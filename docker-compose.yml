@@ -14,3 +14,5 @@ services:
 
 volumes:
   atsak-data:
+    external: true
+    name: repo_atsak-data
