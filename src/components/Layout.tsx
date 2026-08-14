@@ -32,6 +32,8 @@ import {
   IconSearch,
   IconServer2,
   IconApps,
+  IconFolderCog,
+  IconRocket,
 } from "@tabler/icons-react";
 import { trpc } from "../lib/trpc";
 import { useActiveProject } from "../lib/activeProject";
@@ -47,11 +49,15 @@ const GLOBAL_NAV_ITEMS = [
 const SETTINGS_NAV_ITEM = { label: "Settings", to: "/settings", icon: IconSettings };
 
 // Items that reshape around the active project when one is selected.
+// `projectOnly` items have no global equivalent page, so they only appear
+// in the sidebar once a project is active.
 const SCOPED_NAV_ITEMS = [
+  { label: "Overview", icon: IconFolderCog, globalTo: "/overview", scopedTab: "overview", projectOnly: true },
   { label: "Tasks", icon: IconChecklist, globalTo: "/tasks", scopedTab: "tasks" },
   { label: "Specifications", icon: IconFileText, globalTo: "/specifications", scopedTab: "specs" },
   { label: "AI Sessions", icon: IconRobot, globalTo: "/sessions", scopedTab: "sessions" },
   { label: "Scheduled Jobs", icon: IconClockHour4, globalTo: "/jobs", scopedTab: "jobs" },
+  { label: "Deployments", icon: IconRocket, globalTo: "/projects", scopedTab: "deployments", projectOnly: true },
   { label: "Activity", icon: IconActivity, globalTo: "/activity", scopedTab: "activity" },
 ];
 
@@ -116,7 +122,7 @@ function ProjectSwitcher() {
         }
       }}
       clearable={false}
-      mb="xs"
+      w={{ base: 160, xs: 260 }}
     />
   );
 }
@@ -129,13 +135,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const scopedItems = useMemo(
     () =>
-      SCOPED_NAV_ITEMS.map((item) => ({
-        label: item.label,
-        icon: item.icon,
-        to: activeProjectId ? `/projects/${activeProjectId}/${item.scopedTab}` : item.globalTo,
-        // Highlight the scoped nav item when its scoped tab route is active.
-        matchTo: activeProjectId ? `/projects/${activeProjectId}/${item.scopedTab}` : item.globalTo,
-      })),
+      SCOPED_NAV_ITEMS.filter((item) => activeProjectId || !item.projectOnly).map((item) => {
+        const isOverview = item.scopedTab === "overview";
+        // The project's default landing route has no /:tab suffix, so Overview
+        // links there directly instead of the explicit /overview path.
+        const to = activeProjectId
+          ? isOverview
+            ? `/projects/${activeProjectId}`
+            : `/projects/${activeProjectId}/${item.scopedTab}`
+          : item.globalTo;
+        return { label: item.label, icon: item.icon, to, isOverview };
+      }),
     [activeProjectId]
   );
 
@@ -155,6 +165,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </Text>
           </Group>
           <Group>
+            <ProjectSwitcher />
+          </Group>
+          <Group>
             <TextInput
               placeholder="Search projects, tasks, specs..."
               leftSection={<IconSearch size={16} />}
@@ -168,7 +181,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </AppShell.Header>
 
       <AppShell.Navbar p="xs">
-        <ProjectSwitcher />
         <ScrollArea>
           {GLOBAL_NAV_ITEMS.map((item) => (
             <NavLink
@@ -196,7 +208,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               to={item.to}
               label={item.label}
               leftSection={<item.icon size={18} stroke={1.6} />}
-              active={location.pathname.startsWith(item.matchTo)}
+              active={
+                item.isOverview
+                  ? location.pathname === item.to
+                  : location.pathname.startsWith(item.to)
+              }
               variant="filled"
               mb={2}
             />

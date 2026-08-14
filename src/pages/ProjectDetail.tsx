@@ -1,10 +1,9 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import {
   Title,
   Text,
   Stack,
   Group,
-  Tabs,
   Paper,
   SimpleGrid,
   Badge,
@@ -12,23 +11,11 @@ import {
   RingProgress,
   Anchor,
   Table,
-  Center,
   Timeline,
   Card,
   Code,
 } from "@mantine/core";
-import {
-  IconBrandGithub,
-  IconFolderCog,
-  IconChecklist,
-  IconFileText,
-  IconRobot,
-  IconClockHour4,
-  IconRocket,
-  IconActivity,
-  IconGitBranch,
-  IconGitCommit,
-} from "@tabler/icons-react";
+import { IconBrandGithub, IconGitCommit, IconRobot } from "@tabler/icons-react";
 import { trpc } from "../lib/trpc";
 import { LoadingSkeleton, ErrorState, EmptyState } from "../components/DataStates";
 import {
@@ -46,7 +33,6 @@ type ProjectTab = (typeof VALID_TABS)[number];
 
 export default function ProjectDetail() {
   const { id = "", tab } = useParams();
-  const navigate = useNavigate();
   const activeTab: ProjectTab = VALID_TABS.includes(tab as ProjectTab) ? (tab as ProjectTab) : "overview";
   const { data: project, isLoading, isError, error } = trpc.projects.get.useQuery({ id });
   const { data: tasks = [] } = trpc.tasks.list.useQuery({ projectId: id });
@@ -84,39 +70,8 @@ export default function ProjectDetail() {
         </Group>
       </div>
 
-      <Tabs
-        value={activeTab}
-        onChange={(value) => {
-          if (!value) return;
-          navigate(value === "overview" ? `/projects/${id}` : `/projects/${id}/${value}`);
-        }}
-      >
-        <Tabs.List>
-          <Tabs.Tab value="overview" leftSection={<IconFolderCog size={14} />}>
-            Overview
-          </Tabs.Tab>
-          <Tabs.Tab value="tasks" leftSection={<IconChecklist size={14} />}>
-            Tasks ({tasks.length})
-          </Tabs.Tab>
-          <Tabs.Tab value="specs" leftSection={<IconFileText size={14} />}>
-            Specifications ({specs.length})
-          </Tabs.Tab>
-          <Tabs.Tab value="sessions" leftSection={<IconRobot size={14} />}>
-            AI Sessions ({sessions.length})
-          </Tabs.Tab>
-          <Tabs.Tab value="jobs" leftSection={<IconClockHour4 size={14} />}>
-            Scheduled Jobs ({jobs.length})
-          </Tabs.Tab>
-          <Tabs.Tab value="deployments" leftSection={<IconRocket size={14} />}>
-            Deployments ({deployments.length})
-          </Tabs.Tab>
-          <Tabs.Tab value="activity" leftSection={<IconActivity size={14} />}>
-            Activity
-          </Tabs.Tab>
-        </Tabs.List>
-
-        <Tabs.Panel value="overview" pt="md">
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+      {activeTab === "overview" && (
+        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
             <Paper withBorder p="md" radius="md">
               <Title order={5} mb="xs">
                 Details
@@ -234,168 +189,161 @@ export default function ProjectDetail() {
                 </Stack>
               )}
             </Paper>
-          </SimpleGrid>
-        </Tabs.Panel>
+        </SimpleGrid>
+      )}
 
-        <Tabs.Panel value="tasks" pt="md">
-          {tasks.length === 0 ? (
-            <EmptyState text="No tasks for this project yet." />
-          ) : (
-            <Table.ScrollContainer minWidth={600}>
-              <Table verticalSpacing="sm">
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Title</Table.Th>
-                    <Table.Th>Status</Table.Th>
-                    <Table.Th>Priority</Table.Th>
-                    <Table.Th>Assignee</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {tasks.map((t) => (
-                    <Table.Tr key={t.id}>
-                      <Table.Td>
-                        <Anchor component={Link} to="/tasks" size="sm">
-                          {t.title}
-                        </Anchor>
-                      </Table.Td>
-                      <Table.Td>
-                        <Badge color={TASK_STATUS_COLORS[t.status]}>{TASK_STATUS_LABELS[t.status]}</Badge>
-                      </Table.Td>
-                      <Table.Td>{t.priority}</Table.Td>
-                      <Table.Td>{t.assignee || "—"}</Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </Table.ScrollContainer>
-          )}
-        </Tabs.Panel>
-
-        <Tabs.Panel value="specs" pt="md">
-          {specs.length === 0 ? (
-            <EmptyState text="No specifications for this project yet." />
-          ) : (
-            <Stack gap="xs">
-              {specs.map((s) => (
-                <Card key={s.id} withBorder padding="sm">
-                  <Group justify="space-between">
-                    <div>
-                      <Anchor component={Link} to="/specifications" fw={600} size="sm">
-                        {s.filename}
+      {activeTab === "tasks" &&
+        (tasks.length === 0 ? (
+          <EmptyState text="No tasks for this project yet." />
+        ) : (
+          <Table.ScrollContainer minWidth={600}>
+            <Table verticalSpacing="sm">
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Title</Table.Th>
+                  <Table.Th>Status</Table.Th>
+                  <Table.Th>Priority</Table.Th>
+                  <Table.Th>Assignee</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {tasks.map((t) => (
+                  <Table.Tr key={t.id}>
+                    <Table.Td>
+                      <Anchor component={Link} to="/tasks" size="sm">
+                        {t.title}
                       </Anchor>
-                      <Text size="xs" c="dimmed">
-                        {s.path}
-                      </Text>
-                    </div>
-                    <Badge variant="light">{s.category}</Badge>
-                  </Group>
-                  <Text size="sm" mt={4}>
-                    {s.summary}
-                  </Text>
-                </Card>
-              ))}
-            </Stack>
-          )}
-        </Tabs.Panel>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge color={TASK_STATUS_COLORS[t.status]}>{TASK_STATUS_LABELS[t.status]}</Badge>
+                    </Table.Td>
+                    <Table.Td>{t.priority}</Table.Td>
+                    <Table.Td>{t.assignee || "—"}</Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+        ))}
 
-        <Tabs.Panel value="sessions" pt="md">
-          {sessions.length === 0 ? (
-            <EmptyState text="No agent sessions yet." />
-          ) : (
-            <Stack gap="xs">
-              {sessions.map((s) => (
-                <Card key={s.id} withBorder padding="sm">
-                  <Group justify="space-between">
-                    <Group gap={8}>
-                      <IconRobot size={16} />
-                      <Text fw={600} size="sm">
-                        {s.agent}
-                      </Text>
-                      <Badge color={AGENT_SESSION_STATUS_COLORS[s.status]} size="sm">
-                        {s.status}
-                      </Badge>
-                    </Group>
+      {activeTab === "specs" &&
+        (specs.length === 0 ? (
+          <EmptyState text="No specifications for this project yet." />
+        ) : (
+          <Stack gap="xs">
+            {specs.map((s) => (
+              <Card key={s.id} withBorder padding="sm">
+                <Group justify="space-between">
+                  <div>
+                    <Anchor component={Link} to="/specifications" fw={600} size="sm">
+                      {s.filename}
+                    </Anchor>
                     <Text size="xs" c="dimmed">
-                      {formatRelativeTime(s.startedAt)} · {formatDuration(s.durationSeconds)}
+                      {s.path}
                     </Text>
-                  </Group>
-                  <Text size="sm" mt={4} lineClamp={2}>
-                    {s.lastOutput}
-                  </Text>
-                </Card>
-              ))}
-            </Stack>
-          )}
-        </Tabs.Panel>
+                  </div>
+                  <Badge variant="light">{s.category}</Badge>
+                </Group>
+                <Text size="sm" mt={4}>
+                  {s.summary}
+                </Text>
+              </Card>
+            ))}
+          </Stack>
+        ))}
 
-        <Tabs.Panel value="jobs" pt="md">
-          {jobs.length === 0 ? (
-            <EmptyState text="No scheduled jobs yet." />
-          ) : (
-            <Stack gap="xs">
-              {jobs.map((j) => (
-                <Card key={j.id} withBorder padding="sm">
-                  <Group justify="space-between">
+      {activeTab === "sessions" &&
+        (sessions.length === 0 ? (
+          <EmptyState text="No agent sessions yet." />
+        ) : (
+          <Stack gap="xs">
+            {sessions.map((s) => (
+              <Card key={s.id} withBorder padding="sm">
+                <Group justify="space-between">
+                  <Group gap={8}>
+                    <IconRobot size={16} />
                     <Text fw={600} size="sm">
-                      {j.name}
+                      {s.agent}
                     </Text>
-                    <Badge color={JOB_STATUS_COLORS[j.status]}>{j.status}</Badge>
+                    <Badge color={AGENT_SESSION_STATUS_COLORS[s.status]} size="sm">
+                      {s.status}
+                    </Badge>
                   </Group>
                   <Text size="xs" c="dimmed">
-                    <Code>{j.cronExpression}</Code> · {j.timezone}
+                    {formatRelativeTime(s.startedAt)} · {formatDuration(s.durationSeconds)}
                   </Text>
-                </Card>
-              ))}
-            </Stack>
-          )}
-        </Tabs.Panel>
+                </Group>
+                <Text size="sm" mt={4} lineClamp={2}>
+                  {s.lastOutput}
+                </Text>
+              </Card>
+            ))}
+          </Stack>
+        ))}
 
-        <Tabs.Panel value="deployments" pt="md">
-          {deployments.length === 0 ? (
-            <EmptyState text="No deployments yet." />
-          ) : (
-            <Stack gap="xs">
-              {deployments.map((d) => (
-                <Card key={d.id} withBorder padding="sm">
-                  <Group justify="space-between">
-                    <Group gap={8}>
-                      <Text fw={600} size="sm">
-                        {d.environment}
-                      </Text>
-                      <Badge color={DEPLOYMENT_STATUS_COLORS[d.status] ?? "gray"} size="sm">
-                        {d.status}
-                      </Badge>
-                    </Group>
-                    <Text size="xs" c="dimmed">
-                      {formatRelativeTime(d.deployedAt)}
+      {activeTab === "jobs" &&
+        (jobs.length === 0 ? (
+          <EmptyState text="No scheduled jobs yet." />
+        ) : (
+          <Stack gap="xs">
+            {jobs.map((j) => (
+              <Card key={j.id} withBorder padding="sm">
+                <Group justify="space-between">
+                  <Text fw={600} size="sm">
+                    {j.name}
+                  </Text>
+                  <Badge color={JOB_STATUS_COLORS[j.status]}>{j.status}</Badge>
+                </Group>
+                <Text size="xs" c="dimmed">
+                  <Code>{j.cronExpression}</Code> · {j.timezone}
+                </Text>
+              </Card>
+            ))}
+          </Stack>
+        ))}
+
+      {activeTab === "deployments" &&
+        (deployments.length === 0 ? (
+          <EmptyState text="No deployments yet." />
+        ) : (
+          <Stack gap="xs">
+            {deployments.map((d) => (
+              <Card key={d.id} withBorder padding="sm">
+                <Group justify="space-between">
+                  <Group gap={8}>
+                    <Text fw={600} size="sm">
+                      {d.environment}
                     </Text>
+                    <Badge color={DEPLOYMENT_STATUS_COLORS[d.status] ?? "gray"} size="sm">
+                      {d.status}
+                    </Badge>
                   </Group>
                   <Text size="xs" c="dimmed">
-                    <Code>{d.commitSha}</Code>
+                    {formatRelativeTime(d.deployedAt)}
                   </Text>
-                </Card>
-              ))}
-            </Stack>
-          )}
-        </Tabs.Panel>
+                </Group>
+                <Text size="xs" c="dimmed">
+                  <Code>{d.commitSha}</Code>
+                </Text>
+              </Card>
+            ))}
+          </Stack>
+        ))}
 
-        <Tabs.Panel value="activity" pt="md">
-          {activities.length === 0 ? (
-            <EmptyState text="No activity yet." />
-          ) : (
-            <Timeline active={activities.length} bulletSize={10} lineWidth={2}>
-              {activities.map((a) => (
-                <Timeline.Item key={a.id} title={a.message}>
-                  <Text size="xs" c="dimmed">
-                    {formatRelativeTime(a.createdAt)}
-                  </Text>
-                </Timeline.Item>
-              ))}
-            </Timeline>
-          )}
-        </Tabs.Panel>
-      </Tabs>
+      {activeTab === "activity" &&
+        (activities.length === 0 ? (
+          <EmptyState text="No activity yet." />
+        ) : (
+          <Timeline active={activities.length} bulletSize={10} lineWidth={2}>
+            {activities.map((a) => (
+              <Timeline.Item key={a.id} title={a.message}>
+                <Text size="xs" c="dimmed">
+                  {formatRelativeTime(a.createdAt)}
+                </Text>
+              </Timeline.Item>
+            ))}
+          </Timeline>
+        ))}
     </Stack>
   );
 }
