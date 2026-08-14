@@ -163,8 +163,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Text fw={700} size="lg">
               Atsak
             </Text>
-          </Group>
-          <Group>
             <ProjectSwitcher />
           </Group>
           <Group>
