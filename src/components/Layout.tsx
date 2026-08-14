@@ -15,8 +15,10 @@ import {
   TextInput,
   Select,
   Divider,
+  UnstyledButton,
+  Stack,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   IconLayoutDashboard,
   IconFolders,
@@ -34,6 +36,7 @@ import {
   IconApps,
   IconFolderCog,
   IconRocket,
+  IconMenu2,
 } from "@tabler/icons-react";
 import { trpc } from "../lib/trpc";
 import { useActiveProject } from "../lib/activeProject";
@@ -131,6 +134,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const online = useOnlineStatus();
   const location = useLocation();
   const { activeProjectId } = useActiveProject();
+  // Mantine's default "sm" breakpoint (48em) — matches the navbar's own
+  // breakpoint so the bottom nav shows exactly when the sidebar collapses.
+  const isMobile = useMediaQuery("(max-width: 48em)");
 
   const scopedItems = useMemo(
     () =>
@@ -148,10 +154,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     [activeProjectId]
   );
 
+  const tasksItem = scopedItems.find((item) => item.label === "Tasks");
+  const activityItem = scopedItems.find((item) => item.label === "Activity");
+
+  const bottomNavItems = [
+    { label: "Overview", to: "/overview", icon: IconLayoutDashboard, end: false },
+    { label: "Projects", to: "/projects", icon: IconFolders, end: true },
+    ...(tasksItem ? [{ label: "Tasks", to: tasksItem.to, icon: tasksItem.icon, end: true }] : []),
+    ...(activityItem ? [{ label: "Activity", to: activityItem.to, icon: activityItem.icon, end: true }] : []),
+  ];
+
   return (
     <AppShell
       header={{ height: 60 }}
       navbar={{ width: 250, breakpoint: "sm", collapsed: { mobile: !opened } }}
+      footer={{ height: 64, collapsed: !isMobile }}
       padding="md"
     >
       <AppShell.Header>
@@ -247,6 +264,46 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         )}
         <Box>{children}</Box>
       </AppShell.Main>
+
+      <AppShell.Footer hiddenFrom="sm">
+        <Group h="100%" grow gap={0} px={4}>
+          {bottomNavItems.map((item) => {
+            const active =
+              item.to === "/overview"
+                ? location.pathname === "/overview" || location.pathname === "/"
+                : item.end
+                  ? location.pathname === item.to
+                  : location.pathname.startsWith(item.to);
+            return (
+              <UnstyledButton
+                key={item.label}
+                component={RouterNavLink}
+                to={item.to}
+                end={item.end}
+              >
+                <Stack align="center" gap={2} py={6}>
+                  <item.icon
+                    size={20}
+                    stroke={1.6}
+                    color={active ? "var(--mantine-color-brand-6)" : "var(--mantine-color-dimmed)"}
+                  />
+                  <Text size="xs" c={active ? "brand" : "dimmed"} fw={active ? 600 : 400}>
+                    {item.label}
+                  </Text>
+                </Stack>
+              </UnstyledButton>
+            );
+          })}
+          <UnstyledButton onClick={toggle}>
+            <Stack align="center" gap={2} py={6}>
+              <IconMenu2 size={20} stroke={1.6} color="var(--mantine-color-dimmed)" />
+              <Text size="xs" c="dimmed">
+                More
+              </Text>
+            </Stack>
+          </UnstyledButton>
+        </Group>
+      </AppShell.Footer>
     </AppShell>
   );
 }
