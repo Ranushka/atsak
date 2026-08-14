@@ -16,12 +16,21 @@ import {
   Button,
   Divider,
   Menu,
+  Modal,
 } from "@mantine/core";
-import { IconSearch, IconFileText, IconChevronDown } from "@tabler/icons-react";
+import { IconSearch, IconFileText, IconChevronDown, IconPlus } from "@tabler/icons-react";
 import { trpc } from "../lib/trpc";
 import { LoadingSkeleton, ErrorState, EmptyState } from "../components/DataStates";
 import { formatRelativeTime, SPEC_STATUS_COLORS, SPEC_STATUS_LABELS } from "../lib/badges";
 import { getSpecTemplate } from "../lib/specTemplates";
+
+const CATEGORY_OPTIONS = [
+  { value: "product", label: "Product" },
+  { value: "feature", label: "Feature" },
+  { value: "architecture", label: "Architecture" },
+  { value: "api", label: "API" },
+  { value: "decision", label: "Decision" },
+];
 
 // Mirrors the legal-transition rule enforced server-side in
 // specifications.updateStatus: no skipping backwards.
@@ -37,6 +46,15 @@ export default function Specifications() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newSpec, setNewSpec] = useState({
+    projectId: "",
+    filename: "",
+    path: "",
+    category: "product",
+    gitBranch: "main",
+    summary: "",
+  });
 
   const utils = trpc.useUtils();
   const { data: specs, isLoading, isError, error } = trpc.specifications.list.useQuery();
@@ -45,6 +63,15 @@ export default function Specifications() {
 
   const updateMutation = trpc.specifications.update.useMutation({
     onSuccess: () => utils.specifications.list.invalidate(),
+  });
+  const createMutation = trpc.specifications.create.useMutation({
+    onSuccess: ({ id }) => {
+      utils.specifications.list.invalidate();
+      setSelectedId(id);
+      setEditedContent(getSpecTemplate(newSpec.category as any));
+      setCreateOpen(false);
+      setNewSpec({ projectId: "", filename: "", path: "", category: "product", gitBranch: "main", summary: "" });
+    },
   });
   const linkMutation = trpc.specifications.linkTask.useMutation({
     onSuccess: () => utils.specifications.get.invalidate({ id: selectedId ?? "" }),
@@ -79,13 +106,91 @@ export default function Specifications() {
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
   if (isError) return <ErrorState message={error.message} />;
-  if (!specs || specs.length === 0) return <EmptyState text="No specifications yet." />;
 
   const content = editedContent ?? selectedSpec?.content ?? "";
 
+  const createModal = (
+    <Modal opened={createOpen} onClose={() => setCreateOpen(false)} title="New Specification" centered>
+      <Stack gap="sm">
+        <Select
+          label="Project"
+          placeholder="Choose a project"
+          required
+          data={(projects ?? []).map((p) => ({ value: p.id, label: p.name }))}
+          value={newSpec.projectId || null}
+          onChange={(v) => setNewSpec((s) => ({ ...s, projectId: v ?? "" }))}
+        />
+        <TextInput
+          label="Filename"
+          placeholder="e.g. rate-limiting.md"
+          required
+          value={newSpec.filename}
+          onChange={(e) => setNewSpec((s) => ({ ...s, filename: e.currentTarget.value }))}
+        />
+        <TextInput
+          label="Path"
+          placeholder="e.g. docs/specs/rate-limiting.md"
+          required
+          value={newSpec.path}
+          onChange={(e) => setNewSpec((s) => ({ ...s, path: e.currentTarget.value }))}
+        />
+        <Select
+          label="Category"
+          data={CATEGORY_OPTIONS}
+          value={newSpec.category}
+          onChange={(v) => setNewSpec((s) => ({ ...s, category: v ?? "product" }))}
+        />
+        <TextInput
+          label="Git branch"
+          value={newSpec.gitBranch}
+          onChange={(e) => setNewSpec((s) => ({ ...s, gitBranch: e.currentTarget.value }))}
+        />
+        <Textarea
+          label="Summary"
+          placeholder="One-line summary of what this spec covers"
+          value={newSpec.summary}
+          onChange={(e) => setNewSpec((s) => ({ ...s, summary: e.currentTarget.value }))}
+        />
+        <Button
+          loading={createMutation.isLoading}
+          disabled={!newSpec.projectId || !newSpec.filename || !newSpec.path}
+          onClick={() =>
+            createMutation.mutate({
+              ...newSpec,
+              category: newSpec.category as any,
+              content: getSpecTemplate(newSpec.category as any),
+            })
+          }
+        >
+          Create specification
+        </Button>
+      </Stack>
+    </Modal>
+  );
+
+  if (!specs || specs.length === 0)
+    return (
+      <Stack gap="lg">
+        <Group justify="space-between">
+          <Title order={2}>Specifications</Title>
+          <Button leftSection={<IconPlus size={16} />} onClick={() => setCreateOpen(true)}>
+            New Specification
+          </Button>
+        </Group>
+        <EmptyState text="No specifications yet. Create one to get started." />
+        {createModal}
+      </Stack>
+    );
+
   return (
     <Stack gap="lg">
-      <Title order={2}>Specifications</Title>
+      <Group justify="space-between">
+        <Title order={2}>Specifications</Title>
+        <Button leftSection={<IconPlus size={16} />} onClick={() => setCreateOpen(true)}>
+          New Specification
+        </Button>
+      </Group>
+      {createModal}
 
       <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md">
         <Paper withBorder p="sm" radius="md" style={{ gridColumn: "span 1" }}>
