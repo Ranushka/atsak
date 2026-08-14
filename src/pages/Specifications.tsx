@@ -15,14 +15,26 @@ import {
   Select,
   Button,
   Divider,
+  Menu,
 } from "@mantine/core";
-import { IconSearch, IconFileText } from "@tabler/icons-react";
+import { IconSearch, IconFileText, IconChevronDown } from "@tabler/icons-react";
 import { trpc } from "../lib/trpc";
 import { LoadingSkeleton, ErrorState, EmptyState } from "../components/DataStates";
-import { formatRelativeTime } from "../lib/badges";
+import { formatRelativeTime, SPEC_STATUS_COLORS, SPEC_STATUS_LABELS } from "../lib/badges";
+import { getSpecTemplate } from "../lib/specTemplates";
+
+// Mirrors the legal-transition rule enforced server-side in
+// specifications.updateStatus: no skipping backwards.
+const SPEC_STATUS_TRANSITIONS: Record<string, string[]> = {
+  proposal: ["applied", "archived"],
+  applied: ["archived"],
+  archived: [],
+};
+const SPEC_STATUS_ORDER = ["proposal", "applied", "archived"] as const;
 
 export default function Specifications() {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState<string | null>(null);
 
@@ -37,6 +49,12 @@ export default function Specifications() {
   const linkMutation = trpc.specifications.linkTask.useMutation({
     onSuccess: () => utils.specifications.get.invalidate({ id: selectedId ?? "" }),
   });
+  const updateStatusMutation = trpc.specifications.updateStatus.useMutation({
+    onSuccess: () => {
+      utils.specifications.list.invalidate();
+      utils.specifications.get.invalidate({ id: selectedId ?? "" });
+    },
+  });
 
   const projectMap = useMemo(() => new Map((projects ?? []).map((p) => [p.id, p.name])), [projects]);
 
@@ -44,9 +62,10 @@ export default function Specifications() {
     if (!specs) return [];
     const filtered = specs.filter(
       (s) =>
-        !search ||
-        s.filename.toLowerCase().includes(search.toLowerCase()) ||
-        s.path.toLowerCase().includes(search.toLowerCase())
+        (!search ||
+          s.filename.toLowerCase().includes(search.toLowerCase()) ||
+          s.path.toLowerCase().includes(search.toLowerCase())) &&
+        (!statusFilter || s.status === statusFilter)
     );
     const byProject = new Map<string, typeof filtered>();
     for (const s of filtered) {
@@ -54,7 +73,7 @@ export default function Specifications() {
       byProject.get(s.projectId)!.push(s);
     }
     return Array.from(byProject.entries());
-  }, [specs, search]);
+  }, [specs, search, statusFilter]);
 
   const { data: selectedSpec } = trpc.specifications.get.useQuery({ id: selectedId ?? "" }, { enabled: !!selectedId });
 
@@ -77,7 +96,15 @@ export default function Specifications() {
             onChange={(e) => setSearch(e.currentTarget.value)}
             mb="sm"
           />
-          <ScrollArea h={560}>
+          <Select
+            placeholder="Status"
+            clearable
+            data={SPEC_STATUS_ORDER.map((s) => ({ value: s, label: SPEC_STATUS_LABELS[s] }))}
+            value={statusFilter}
+            onChange={setStatusFilter}
+            mb="sm"
+          />
+          <ScrollArea h={520}>
             {grouped.map(([projectId, projectSpecs]) => (
               <div key={projectId}>
                 <Text size="xs" fw={700} c="dimmed" tt="uppercase" mt="sm" mb={2}>
@@ -89,6 +116,11 @@ export default function Specifications() {
                     label={s.filename}
                     description={s.path}
                     leftSection={<IconFileText size={14} />}
+                    rightSection={
+                      <Badge size="xs" color={SPEC_STATUS_COLORS[s.status]} variant="light">
+                        {SPEC_STATUS_LABELS[s.status] ?? s.status}
+                      </Badge>
+                    }
                     active={selectedId === s.id}
                     onClick={() => {
                       setSelectedId(s.id);
@@ -117,14 +149,23 @@ export default function Specifications() {
                 minRows={20}
                 styles={{ input: { fontFamily: "monospace", fontSize: 13 } }}
               />
-              <Button
-                size="xs"
-                w={140}
-                loading={updateMutation.isLoading}
-                onClick={() => selectedSpec && updateMutation.mutate({ id: selectedSpec.id, content })}
-              >
-                Save changes
-              </Button>
+              <Group gap="xs">
+                <Button
+                  size="xs"
+                  w={140}
+                  loading={updateMutation.isLoading}
+                  onClick={() => selectedSpec && updateMutation.mutate({ id: selectedSpec.id, content })}
+                >
+                  Save changes
+                </Button>
+                <Button
+                  size="xs"
+                  variant="light"
+                  onClick={() => setEditedContent(getSpecTemplate(selectedSpec.category))}
+                >
+                  Insert template for {selectedSpec.category}
+                </Button>
+              </Group>
             </Stack>
           )}
         </Paper>
@@ -144,6 +185,30 @@ export default function Specifications() {
               </div>
 
               <Divider label="Metadata" />
+              <Group justify="space-between">
+                <Badge color={SPEC_STATUS_COLORS[selectedSpec.status]}>
+                  {SPEC_STATUS_LABELS[selectedSpec.status] ?? selectedSpec.status}
+                </Badge>
+                {(SPEC_STATUS_TRANSITIONS[selectedSpec.status] ?? []).length > 0 && (
+                  <Menu withinPortal position="bottom-end">
+                    <Menu.Target>
+                      <Button size="xs" variant="light" rightSection={<IconChevronDown size={14} />}>
+                        Advance status
+                      </Button>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      {(SPEC_STATUS_TRANSITIONS[selectedSpec.status] ?? []).map((next) => (
+                        <Menu.Item
+                          key={next}
+                          onClick={() => updateStatusMutation.mutate({ id: selectedSpec.id, status: next as "proposal" | "applied" | "archived" })}
+                        >
+                          Mark as {SPEC_STATUS_LABELS[next] ?? next}
+                        </Menu.Item>
+                      ))}
+                    </Menu.Dropdown>
+                  </Menu>
+                )}
+              </Group>
               <Text size="sm">
                 <b>Path:</b> {selectedSpec.path}
               </Text>

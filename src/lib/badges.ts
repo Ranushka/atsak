@@ -23,6 +23,20 @@ export const TASK_PRIORITY_COLORS: Record<string, string> = {
   urgent: "red",
 };
 
+// OpenSpec-style spec lifecycle: proposal (draft) -> applied (accepted
+// source of truth) -> archived (superseded, kept for history).
+export const SPEC_STATUS_COLORS: Record<string, string> = {
+  proposal: "yellow",
+  applied: "green",
+  archived: "gray",
+};
+
+export const SPEC_STATUS_LABELS: Record<string, string> = {
+  proposal: "Proposal",
+  applied: "Applied",
+  archived: "Archived",
+};
+
 export const AGENT_SESSION_STATUS_COLORS: Record<string, string> = {
   queued: "gray",
   running: "blue",

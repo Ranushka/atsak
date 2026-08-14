@@ -1,23 +1,74 @@
 import { useMemo, useState } from "react";
-import { Title, Stack, Group, Table, Badge, Text, Tooltip, ActionIcon, Modal, Code, Menu, Button, ScrollArea, Anchor } from "@mantine/core";
-import { IconDots, IconPlayerStop, IconRefresh, IconEye, IconRobot } from "@tabler/icons-react";
+import {
+  Title,
+  Stack,
+  Group,
+  Table,
+  Badge,
+  Text,
+  Tooltip,
+  ActionIcon,
+  Modal,
+  Code,
+  Menu,
+  Button,
+  ScrollArea,
+  Anchor,
+  Select,
+} from "@mantine/core";
+import { IconDots, IconPlayerStop, IconRefresh, IconEye, IconRobot, IconPlus } from "@tabler/icons-react";
 import { trpc } from "../lib/trpc";
 import { LoadingSkeleton, ErrorState, EmptyState } from "../components/DataStates";
 import { AGENT_SESSION_STATUS_COLORS, formatDuration, formatRelativeTime } from "../lib/badges";
+import { countUnapprovedSpecs, SpecApprovalGateModal } from "../components/SpecApprovalGate";
+
+const AGENT_OPTIONS = ["claude", "codex"];
 
 export default function AiSessions() {
   const [logSessionId, setLogSessionId] = useState<string | null>(null);
+  const [newSessionOpen, setNewSessionOpen] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const [newProjectId, setNewProjectId] = useState<string | null>(null);
+  const [newTaskId, setNewTaskId] = useState<string | null>(null);
+  const [newAgent, setNewAgent] = useState<string | null>("claude");
 
   const utils = trpc.useUtils();
   const { data: sessions, isLoading, isError, error } = trpc.agentSessions.list.useQuery();
   const { data: projects } = trpc.projects.list.useQuery();
   const { data: tasks } = trpc.tasks.list.useQuery();
+  const { data: newTaskDetail } = trpc.tasks.get.useQuery({ id: newTaskId ?? "" }, { enabled: !!newTaskId });
 
   const stopMutation = trpc.agentSessions.stop.useMutation({ onSuccess: () => utils.agentSessions.list.invalidate() });
   const reopenMutation = trpc.agentSessions.reopen.useMutation({ onSuccess: () => utils.agentSessions.list.invalidate() });
+  const startMutation = trpc.agentSessions.start.useMutation({
+    onSuccess: () => {
+      utils.agentSessions.list.invalidate();
+      setGateOpen(false);
+      setNewSessionOpen(false);
+      setNewProjectId(null);
+      setNewTaskId(null);
+      setNewAgent("claude");
+    },
+  });
 
   const projectMap = useMemo(() => new Map((projects ?? []).map((p) => [p.id, p.name])), [projects]);
   const taskMap = useMemo(() => new Map((tasks ?? []).map((t) => [t.id, t.title])), [tasks]);
+
+  const unapprovedCount = countUnapprovedSpecs(newTaskDetail?.linkedSpecs);
+
+  function doStartNewSession() {
+    if (!newProjectId || !newAgent) return;
+    startMutation.mutate({ projectId: newProjectId, taskId: newTaskId ?? undefined, agent: newAgent });
+  }
+
+  function handleStartClick() {
+    if (!newProjectId || !newAgent) return;
+    if (newTaskId && unapprovedCount > 0) {
+      setGateOpen(true);
+      return;
+    }
+    doStartNewSession();
+  }
 
   if (isLoading) return <LoadingSkeleton rows={6} />;
   if (isError) return <ErrorState message={error.message} />;
@@ -27,7 +78,12 @@ export default function AiSessions() {
 
   return (
     <Stack gap="lg">
-      <Title order={2}>AI Sessions</Title>
+      <Group justify="space-between">
+        <Title order={2}>AI Sessions</Title>
+        <Button leftSection={<IconPlus size={14} />} onClick={() => setNewSessionOpen(true)}>
+          New session
+        </Button>
+      </Group>
 
       {rows.length === 0 ? (
         <EmptyState text="No agent sessions yet." />
@@ -128,6 +184,55 @@ export default function AiSessions() {
           </Code>
         </ScrollArea>
       </Modal>
+
+      <Modal
+        opened={newSessionOpen}
+        onClose={() => setNewSessionOpen(false)}
+        title="Start a new AI session"
+      >
+        <Stack gap="sm">
+          <Select
+            label="Project"
+            placeholder="Choose a project"
+            required
+            data={(projects ?? []).map((p) => ({ value: p.id, label: p.name }))}
+            value={newProjectId}
+            onChange={(v) => {
+              setNewProjectId(v);
+              setNewTaskId(null);
+            }}
+          />
+          <Select
+            label="Task (optional)"
+            placeholder="Choose a task to link"
+            searchable
+            clearable
+            disabled={!newProjectId}
+            data={(tasks ?? [])
+              .filter((t) => t.projectId === newProjectId)
+              .map((t) => ({ value: t.id, label: t.title }))}
+            value={newTaskId}
+            onChange={setNewTaskId}
+          />
+          <Select label="Agent" required data={AGENT_OPTIONS} value={newAgent} onChange={setNewAgent} />
+          <Group justify="flex-end" mt="xs">
+            <Button variant="default" onClick={() => setNewSessionOpen(false)}>
+              Cancel
+            </Button>
+            <Button loading={startMutation.isLoading} disabled={!newProjectId} onClick={handleStartClick}>
+              Start session
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      <SpecApprovalGateModal
+        opened={gateOpen}
+        unapprovedCount={unapprovedCount}
+        onCancel={() => setGateOpen(false)}
+        onConfirm={doStartNewSession}
+        confirmLoading={startMutation.isLoading}
+      />
     </Stack>
   );
 }

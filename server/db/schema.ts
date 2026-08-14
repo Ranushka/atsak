@@ -63,6 +63,7 @@ export const specifications = sqliteTable("specifications", {
   filename: text("filename").notNull(),
   path: text("path").notNull(),
   category: text("category").notNull().default("product"), // product/feature/architecture/api/decision
+  status: text("status").notNull().default("proposal"), // proposal/applied/archived (OpenSpec-style lifecycle)
   gitBranch: text("git_branch").notNull().default("main"),
   lastUpdated: integer("last_updated", { mode: "timestamp" }).notNull(),
   summary: text("summary").notNull().default(""),

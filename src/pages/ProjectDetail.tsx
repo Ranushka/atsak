@@ -24,6 +24,8 @@ import {
   AGENT_SESSION_STATUS_COLORS,
   JOB_STATUS_COLORS,
   DEPLOYMENT_STATUS_COLORS,
+  SPEC_STATUS_COLORS,
+  SPEC_STATUS_LABELS,
   formatRelativeTime,
   formatDuration,
 } from "../lib/badges";
@@ -242,7 +244,12 @@ export default function ProjectDetail() {
                       {s.path}
                     </Text>
                   </div>
-                  <Badge variant="light">{s.category}</Badge>
+                  <Group gap={6}>
+                    <Badge color={SPEC_STATUS_COLORS[s.status]} size="sm">
+                      {SPEC_STATUS_LABELS[s.status] ?? s.status}
+                    </Badge>
+                    <Badge variant="light">{s.category}</Badge>
+                  </Group>
                 </Group>
                 <Text size="sm" mt={4}>
                   {s.summary}

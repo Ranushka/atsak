@@ -18,11 +18,20 @@ import {
   Anchor,
   Paper,
   ScrollArea,
+  Button,
 } from "@mantine/core";
-import { IconSearch, IconLayoutKanban, IconTable } from "@tabler/icons-react";
+import { IconSearch, IconLayoutKanban, IconTable, IconRobot } from "@tabler/icons-react";
 import { trpc } from "../lib/trpc";
 import { LoadingSkeleton, ErrorState, EmptyState } from "../components/DataStates";
-import { TASK_STATUS_COLORS, TASK_STATUS_LABELS, TASK_PRIORITY_COLORS, formatRelativeTime } from "../lib/badges";
+import {
+  TASK_STATUS_COLORS,
+  TASK_STATUS_LABELS,
+  TASK_PRIORITY_COLORS,
+  SPEC_STATUS_COLORS,
+  SPEC_STATUS_LABELS,
+  formatRelativeTime,
+} from "../lib/badges";
+import { countUnapprovedSpecs, SpecApprovalGateModal } from "../components/SpecApprovalGate";
 
 const STATUS_COLUMNS = ["backlog", "ready", "in_progress", "review", "blocked", "done"] as const;
 
@@ -210,6 +219,30 @@ export default function AllTasks() {
 
 function TaskDetailDrawer({ taskId, onClose }: { taskId: string | null; onClose: () => void }) {
   const { data: task } = trpc.tasks.get.useQuery({ id: taskId ?? "" }, { enabled: !!taskId });
+  const [gateOpen, setGateOpen] = useState(false);
+
+  const utils = trpc.useUtils();
+  const startSession = trpc.agentSessions.start.useMutation({
+    onSuccess: () => {
+      setGateOpen(false);
+      utils.agentSessions.list.invalidate();
+    },
+  });
+
+  const unapprovedCount = countUnapprovedSpecs(task?.linkedSpecs);
+
+  function handleStartClick() {
+    if (unapprovedCount > 0) {
+      setGateOpen(true);
+      return;
+    }
+    doStart();
+  }
+
+  function doStart() {
+    if (!task) return;
+    startSession.mutate({ projectId: task.projectId, taskId: task.id, agent: "claude" });
+  }
 
   return (
     <Drawer opened={!!taskId} onClose={onClose} title={task?.title ?? "Task"} position="right" size="md">
@@ -217,13 +250,28 @@ function TaskDetailDrawer({ taskId, onClose }: { taskId: string | null; onClose:
         <LoadingSkeleton rows={4} />
       ) : (
         <Stack gap="md">
-          <Group gap={6}>
-            <Badge color={TASK_STATUS_COLORS[task.status]}>{TASK_STATUS_LABELS[task.status]}</Badge>
-            <Badge color={TASK_PRIORITY_COLORS[task.priority]} variant="light">
-              {task.priority}
-            </Badge>
-            <Badge variant="outline">{task.type}</Badge>
+          <Group gap={6} justify="space-between">
+            <Group gap={6}>
+              <Badge color={TASK_STATUS_COLORS[task.status]}>{TASK_STATUS_LABELS[task.status]}</Badge>
+              <Badge color={TASK_PRIORITY_COLORS[task.priority]} variant="light">
+                {task.priority}
+              </Badge>
+              <Badge variant="outline">{task.type}</Badge>
+            </Group>
+            <Button
+              size="xs"
+              leftSection={<IconRobot size={14} />}
+              loading={startSession.isLoading}
+              onClick={handleStartClick}
+            >
+              Start AI session
+            </Button>
           </Group>
+          {startSession.isSuccess && (
+            <Text size="xs" c="green">
+              Session started.
+            </Text>
+          )}
 
           <Text size="sm">{task.description || "No description."}</Text>
 
@@ -272,11 +320,14 @@ function TaskDetailDrawer({ taskId, onClose }: { taskId: string | null; onClose:
               No linked specifications.
             </Text>
           ) : (
-            <Stack gap={2}>
+            <Stack gap={4}>
               {task.linkedSpecs.map((s) => (
-                <Text key={s.id} size="sm">
-                  {s.filename}
-                </Text>
+                <Group key={s.id} gap={6} justify="space-between">
+                  <Text size="sm">{s.filename}</Text>
+                  <Badge size="xs" color={SPEC_STATUS_COLORS[s.status]}>
+                    {SPEC_STATUS_LABELS[s.status] ?? s.status}
+                  </Badge>
+                </Group>
               ))}
             </Stack>
           )}
@@ -291,6 +342,13 @@ function TaskDetailDrawer({ taskId, onClose }: { taskId: string | null; onClose:
           )}
         </Stack>
       )}
+      <SpecApprovalGateModal
+        opened={gateOpen}
+        unapprovedCount={unapprovedCount}
+        onCancel={() => setGateOpen(false)}
+        onConfirm={doStart}
+        confirmLoading={startSession.isLoading}
+      />
     </Drawer>
   );
 }

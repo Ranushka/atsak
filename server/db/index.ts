@@ -66,6 +66,7 @@ export function ensureSchema() {
       filename TEXT NOT NULL,
       path TEXT NOT NULL,
       category TEXT NOT NULL DEFAULT 'product',
+      status TEXT NOT NULL DEFAULT 'proposal',
       git_branch TEXT NOT NULL DEFAULT 'main',
       last_updated INTEGER NOT NULL,
       summary TEXT NOT NULL DEFAULT '',
@@ -143,6 +144,14 @@ export function ensureSchema() {
       value TEXT NOT NULL DEFAULT ''
     );
   `);
+
+  // Defensive migration: `specifications.status` was added after the initial
+  // release. CREATE TABLE IF NOT EXISTS above won't add it to an existing
+  // on-disk DB, so backfill it here if missing.
+  const specColumns = sqlite.prepare(`PRAGMA table_info(specifications)`).all() as { name: string }[];
+  if (!specColumns.some((c) => c.name === "status")) {
+    sqlite.exec(`ALTER TABLE specifications ADD COLUMN status TEXT NOT NULL DEFAULT 'proposal';`);
+  }
 }
 
 export function isDatabaseEmpty(): boolean {

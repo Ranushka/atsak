@@ -15,6 +15,17 @@ const specInput = z.object({
   content: z.string().default(""),
 });
 
+// OpenSpec-style lifecycle: proposal (draft) -> applied (accepted source of
+// truth) -> archived (superseded). No skipping backwards.
+export const SPEC_STATUSES = ["proposal", "applied", "archived"] as const;
+export type SpecStatus = (typeof SPEC_STATUSES)[number];
+
+const LEGAL_STATUS_TRANSITIONS: Record<SpecStatus, SpecStatus[]> = {
+  proposal: ["applied", "archived"],
+  applied: ["archived"],
+  archived: [],
+};
+
 export const specificationsRouter = router({
   list: publicProcedure.input(z.object({ projectId: z.string().optional() }).optional()).query(async ({ input }) => {
     let rows = await db.select().from(specifications).all();
@@ -53,6 +64,29 @@ export const specificationsRouter = router({
     await db.delete(specifications).where(eq(specifications.id, input.id)).run();
     return { id: input.id };
   }),
+
+  updateStatus: publicProcedure
+    .input(z.object({ id: z.string(), status: z.enum(SPEC_STATUSES) }))
+    .mutation(async ({ input }) => {
+      const spec = await db.select().from(specifications).where(eq(specifications.id, input.id)).get();
+      if (!spec) throw new Error("Specification not found");
+
+      const current = spec.status as SpecStatus;
+      if (current === input.status) {
+        return { id: input.id };
+      }
+      const allowed = LEGAL_STATUS_TRANSITIONS[current] ?? [];
+      if (!allowed.includes(input.status)) {
+        throw new Error(`Cannot transition specification from "${current}" to "${input.status}"`);
+      }
+
+      await db
+        .update(specifications)
+        .set({ status: input.status, lastUpdated: new Date() })
+        .where(eq(specifications.id, input.id))
+        .run();
+      return { id: input.id };
+    }),
 
   linkTask: publicProcedure
     .input(z.object({ specificationId: z.string(), taskId: z.string() }))
