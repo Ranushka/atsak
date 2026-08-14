@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Title,
   Text,
@@ -41,8 +41,13 @@ import {
   formatDuration,
 } from "../lib/badges";
 
+const VALID_TABS = ["overview", "tasks", "specs", "sessions", "jobs", "deployments", "activity"] as const;
+type ProjectTab = (typeof VALID_TABS)[number];
+
 export default function ProjectDetail() {
-  const { id = "" } = useParams();
+  const { id = "", tab } = useParams();
+  const navigate = useNavigate();
+  const activeTab: ProjectTab = VALID_TABS.includes(tab as ProjectTab) ? (tab as ProjectTab) : "overview";
   const { data: project, isLoading, isError, error } = trpc.projects.get.useQuery({ id });
   const { data: tasks = [] } = trpc.tasks.list.useQuery({ projectId: id });
   const { data: specs = [] } = trpc.specifications.list.useQuery({ projectId: id });
@@ -79,7 +84,13 @@ export default function ProjectDetail() {
         </Group>
       </div>
 
-      <Tabs defaultValue="overview">
+      <Tabs
+        value={activeTab}
+        onChange={(value) => {
+          if (!value) return;
+          navigate(value === "overview" ? `/projects/${id}` : `/projects/${id}/${value}`);
+        }}
+      >
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconFolderCog size={14} />}>
             Overview

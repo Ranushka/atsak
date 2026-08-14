@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { NavLink as RouterNavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   AppShell,
   Burger,
@@ -13,6 +13,8 @@ import {
   Alert,
   Box,
   TextInput,
+  Select,
+  Divider,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -29,17 +31,28 @@ import {
   IconWifiOff,
   IconSearch,
   IconServer2,
+  IconApps,
 } from "@tabler/icons-react";
+import { trpc } from "../lib/trpc";
+import { useActiveProject } from "../lib/activeProject";
 
-const NAV_ITEMS = [
-  { label: "Overview", to: "/", icon: IconLayoutDashboard },
+const ALL_PROJECTS_VALUE = "__all__";
+
+// Items that are always global, regardless of the active project.
+const GLOBAL_NAV_ITEMS = [
+  { label: "Overview", to: "/overview", icon: IconLayoutDashboard },
   { label: "Projects", to: "/projects", icon: IconFolders },
-  { label: "All Tasks", to: "/tasks", icon: IconChecklist },
-  { label: "Specifications", to: "/specifications", icon: IconFileText },
-  { label: "Scheduled Jobs", to: "/jobs", icon: IconClockHour4 },
-  { label: "AI Sessions", to: "/sessions", icon: IconRobot },
-  { label: "Activity", to: "/activity", icon: IconActivity },
-  { label: "Settings", to: "/settings", icon: IconSettings },
+];
+
+const SETTINGS_NAV_ITEM = { label: "Settings", to: "/settings", icon: IconSettings };
+
+// Items that reshape around the active project when one is selected.
+const SCOPED_NAV_ITEMS = [
+  { label: "Tasks", icon: IconChecklist, globalTo: "/tasks", scopedTab: "tasks" },
+  { label: "Specifications", icon: IconFileText, globalTo: "/specifications", scopedTab: "specs" },
+  { label: "AI Sessions", icon: IconRobot, globalTo: "/sessions", scopedTab: "sessions" },
+  { label: "Scheduled Jobs", icon: IconClockHour4, globalTo: "/jobs", scopedTab: "jobs" },
+  { label: "Activity", icon: IconActivity, globalTo: "/activity", scopedTab: "activity" },
 ];
 
 function useOnlineStatus() {
@@ -73,10 +86,58 @@ function ColorSchemeToggle() {
   );
 }
 
+function ProjectSwitcher() {
+  const navigate = useNavigate();
+  const { activeProjectId, setActiveProjectId } = useActiveProject();
+  const { data: projects } = trpc.projects.list.useQuery();
+
+  const data = useMemo(
+    () => [
+      { value: ALL_PROJECTS_VALUE, label: "All Projects" },
+      ...(projects ?? []).map((p) => ({ value: p.id, label: p.name })),
+    ],
+    [projects]
+  );
+
+  return (
+    <Select
+      leftSection={<IconApps size={16} />}
+      placeholder="Select a project…"
+      searchable
+      data={data}
+      value={activeProjectId ?? null}
+      onChange={(value) => {
+        if (!value || value === ALL_PROJECTS_VALUE) {
+          setActiveProjectId(null);
+          navigate("/overview");
+        } else {
+          setActiveProjectId(value);
+          navigate(`/projects/${value}`);
+        }
+      }}
+      clearable={false}
+      mb="xs"
+    />
+  );
+}
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [opened, { toggle }] = useDisclosure();
   const online = useOnlineStatus();
   const location = useLocation();
+  const { activeProjectId } = useActiveProject();
+
+  const scopedItems = useMemo(
+    () =>
+      SCOPED_NAV_ITEMS.map((item) => ({
+        label: item.label,
+        icon: item.icon,
+        to: activeProjectId ? `/projects/${activeProjectId}/${item.scopedTab}` : item.globalTo,
+        // Highlight the scoped nav item when its scoped tab route is active.
+        matchTo: activeProjectId ? `/projects/${activeProjectId}/${item.scopedTab}` : item.globalTo,
+      })),
+    [activeProjectId]
+  );
 
   return (
     <AppShell
@@ -107,19 +168,52 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </AppShell.Header>
 
       <AppShell.Navbar p="xs">
+        <ProjectSwitcher />
         <ScrollArea>
-          {NAV_ITEMS.map((item) => (
+          {GLOBAL_NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
               component={RouterNavLink}
               to={item.to}
               label={item.label}
               leftSection={<item.icon size={18} stroke={1.6} />}
-              active={item.to === "/" ? location.pathname === "/" : location.pathname.startsWith(item.to)}
+              active={
+                item.to === "/overview"
+                  ? location.pathname === "/overview" || location.pathname === "/"
+                  : location.pathname === item.to
+              }
               variant="filled"
               mb={2}
             />
           ))}
+
+          <Divider my="xs" label={activeProjectId ? "This project" : "All projects"} labelPosition="left" />
+
+          {scopedItems.map((item) => (
+            <NavLink
+              key={item.label}
+              component={RouterNavLink}
+              to={item.to}
+              label={item.label}
+              leftSection={<item.icon size={18} stroke={1.6} />}
+              active={location.pathname.startsWith(item.matchTo)}
+              variant="filled"
+              mb={2}
+            />
+          ))}
+
+          <Divider my="xs" />
+
+          <NavLink
+            key={SETTINGS_NAV_ITEM.to}
+            component={RouterNavLink}
+            to={SETTINGS_NAV_ITEM.to}
+            label={SETTINGS_NAV_ITEM.label}
+            leftSection={<SETTINGS_NAV_ITEM.icon size={18} stroke={1.6} />}
+            active={location.pathname.startsWith(SETTINGS_NAV_ITEM.to)}
+            variant="filled"
+            mb={2}
+          />
         </ScrollArea>
       </AppShell.Navbar>
 

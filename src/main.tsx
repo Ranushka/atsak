@@ -12,6 +12,7 @@ import "@mantine/notifications/styles.css";
 
 import { trpc } from "./lib/trpc";
 import { theme } from "./theme";
+import { ActiveProjectProvider } from "./lib/activeProject";
 import App from "./App";
 
 const queryClient = new QueryClient({
@@ -39,7 +40,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <MantineProvider theme={theme} defaultColorScheme="auto">
           <Notifications position="top-right" />
           <BrowserRouter>
-            <App />
+            <ActiveProjectProvider>
+              <App />
+            </ActiveProjectProvider>
           </BrowserRouter>
         </MantineProvider>
       </QueryClientProvider>
