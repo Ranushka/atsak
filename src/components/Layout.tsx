@@ -109,7 +109,6 @@ function ProjectSwitcher() {
     <Select
       leftSection={<IconApps size={16} />}
       placeholder="Select a project…"
-      searchable
       data={data}
       value={activeProjectId ?? null}
       onChange={(value) => {
@@ -185,6 +184,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               key={item.to}
               component={RouterNavLink}
               to={item.to}
+              end
               label={item.label}
               leftSection={<item.icon size={18} stroke={1.6} />}
               active={
@@ -204,6 +204,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               key={item.label}
               component={RouterNavLink}
               to={item.to}
+              end
               label={item.label}
               leftSection={<item.icon size={18} stroke={1.6} />}
               active={
@@ -222,6 +223,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             key={SETTINGS_NAV_ITEM.to}
             component={RouterNavLink}
             to={SETTINGS_NAV_ITEM.to}
+            end
             label={SETTINGS_NAV_ITEM.label}
             leftSection={<SETTINGS_NAV_ITEM.icon size={18} stroke={1.6} />}
             active={location.pathname.startsWith(SETTINGS_NAV_ITEM.to)}
