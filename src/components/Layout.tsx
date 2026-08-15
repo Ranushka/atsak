@@ -154,13 +154,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     [activeProjectId]
   );
 
-  const tasksItem = scopedItems.find((item) => item.label === "Tasks");
   const activityItem = scopedItems.find((item) => item.label === "Activity");
 
   const bottomNavItems = [
     { label: "Overview", to: "/overview", icon: IconLayoutDashboard, end: false },
-    { label: "Projects", to: "/projects", icon: IconFolders, end: true },
-    ...(tasksItem ? [{ label: "Tasks", to: tasksItem.to, icon: tasksItem.icon, end: true }] : []),
     ...(activityItem ? [{ label: "Activity", to: activityItem.to, icon: activityItem.icon, end: true }] : []),
   ];
 
