@@ -17,6 +17,7 @@ import {
   Divider,
   Menu,
   Modal,
+  SegmentedControl,
 } from "@mantine/core";
 import { IconSearch, IconFileText, IconChevronDown, IconPlus } from "@tabler/icons-react";
 import { trpc } from "../lib/trpc";
@@ -46,6 +47,7 @@ export default function Specifications() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"preview" | "edit">("preview");
   const [createOpen, setCreateOpen] = useState(false);
   const [newSpec, setNewSpec] = useState({
     projectId: "",
@@ -69,6 +71,7 @@ export default function Specifications() {
       utils.specifications.list.invalidate();
       setSelectedId(id);
       setEditedContent(getSpecTemplate(newSpec.category as any));
+      setViewMode("edit");
       setCreateOpen(false);
       setNewSpec({ projectId: "", filename: "", path: "", category: "product", gitBranch: "main", summary: "" });
     },
@@ -230,6 +233,7 @@ export default function Specifications() {
                     onClick={() => {
                       setSelectedId(s.id);
                       setEditedContent(null);
+                      setViewMode("preview");
                     }}
                   />
                 ))}
@@ -244,33 +248,53 @@ export default function Specifications() {
           ) : (
             <Stack gap="xs">
               <Group justify="space-between">
-                <Text fw={600}>{selectedSpec.filename}</Text>
-                <Badge variant="light">{selectedSpec.category}</Badge>
-              </Group>
-              <Textarea
-                value={content}
-                onChange={(e) => setEditedContent(e.currentTarget.value)}
-                autosize
-                minRows={20}
-                styles={{ input: { fontFamily: "monospace", fontSize: 13 } }}
-              />
-              <Group gap="xs">
-                <Button
+                <Group gap="xs">
+                  <Text fw={600}>{selectedSpec.filename}</Text>
+                  <Badge variant="light">{selectedSpec.category}</Badge>
+                </Group>
+                <SegmentedControl
                   size="xs"
-                  w={140}
-                  loading={updateMutation.isLoading}
-                  onClick={() => selectedSpec && updateMutation.mutate({ id: selectedSpec.id, content })}
-                >
-                  Save changes
-                </Button>
-                <Button
-                  size="xs"
-                  variant="light"
-                  onClick={() => setEditedContent(getSpecTemplate(selectedSpec.category))}
-                >
-                  Insert template for {selectedSpec.category}
-                </Button>
+                  value={viewMode}
+                  onChange={(v) => setViewMode(v as "preview" | "edit")}
+                  data={[
+                    { label: "Preview", value: "preview" },
+                    { label: "Edit", value: "edit" },
+                  ]}
+                />
               </Group>
+
+              {viewMode === "preview" ? (
+                <Paper withBorder p="sm" mih={480} style={{ overflow: "auto" }}>
+                  <ReactMarkdown>{content}</ReactMarkdown>
+                </Paper>
+              ) : (
+                <>
+                  <Textarea
+                    value={content}
+                    onChange={(e) => setEditedContent(e.currentTarget.value)}
+                    autosize
+                    minRows={20}
+                    styles={{ input: { fontFamily: "monospace", fontSize: 13 } }}
+                  />
+                  <Group gap="xs">
+                    <Button
+                      size="xs"
+                      w={140}
+                      loading={updateMutation.isLoading}
+                      onClick={() => selectedSpec && updateMutation.mutate({ id: selectedSpec.id, content })}
+                    >
+                      Save changes
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="light"
+                      onClick={() => setEditedContent(getSpecTemplate(selectedSpec.category))}
+                    >
+                      Insert template for {selectedSpec.category}
+                    </Button>
+                  </Group>
+                </>
+              )}
             </Stack>
           )}
         </Paper>
@@ -280,15 +304,6 @@ export default function Specifications() {
             <EmptyState text="Metadata and preview will appear here." />
           ) : (
             <Stack gap="sm">
-              <div>
-                <Text size="xs" c="dimmed">
-                  Preview
-                </Text>
-                <Paper withBorder p="sm" mt={4} mah={280} style={{ overflow: "auto" }}>
-                  <ReactMarkdown>{content}</ReactMarkdown>
-                </Paper>
-              </div>
-
               <Divider label="Metadata" />
               <Group justify="space-between">
                 <Badge color={SPEC_STATUS_COLORS[selectedSpec.status]}>
