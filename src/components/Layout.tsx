@@ -23,6 +23,7 @@ import {
   IconLayoutDashboard,
   IconFolders,
   IconChecklist,
+  IconFileText,
   IconClockHour4,
   IconRobot,
   IconActivity,
@@ -56,6 +57,7 @@ const SETTINGS_NAV_ITEM = { label: "Settings", to: "/settings", icon: IconSettin
 const SCOPED_NAV_ITEMS = [
   { label: "Overview", icon: IconFolderCog, globalTo: "/overview", scopedTab: "overview", projectOnly: true },
   { label: "Tasks", icon: IconChecklist, globalTo: "/tasks", scopedTab: "tasks" },
+  { label: "Specifications", icon: IconFileText, globalTo: "/overview", scopedTab: "specs", projectOnly: true },
   { label: "AI Sessions", icon: IconRobot, globalTo: "/sessions", scopedTab: "sessions" },
   { label: "Scheduled Jobs", icon: IconClockHour4, globalTo: "/jobs", scopedTab: "jobs" },
   { label: "Deployments", icon: IconRocket, globalTo: "/projects", scopedTab: "deployments", projectOnly: true },
