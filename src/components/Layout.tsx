@@ -125,6 +125,14 @@ function ProjectSwitcher() {
       }}
       clearable={false}
       w={{ base: 160, xs: 260 }}
+      renderOption={({ option, checked }) => (
+        <Group justify="space-between" wrap="nowrap" w="100%">
+          <Text size="sm" fw={checked ? 600 : 400}>
+            {option.label}
+          </Text>
+          {checked && <Box w={8} h={8} bg="blue.5" style={{ borderRadius: "50%", flexShrink: 0 }} />}
+        </Group>
+      )}
     />
   );
 }
