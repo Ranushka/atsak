@@ -24,13 +24,11 @@ import {
   AGENT_SESSION_STATUS_COLORS,
   JOB_STATUS_COLORS,
   DEPLOYMENT_STATUS_COLORS,
-  SPEC_STATUS_COLORS,
-  SPEC_STATUS_LABELS,
   formatRelativeTime,
   formatDuration,
 } from "../lib/badges";
 
-const VALID_TABS = ["overview", "tasks", "specs", "sessions", "jobs", "deployments", "activity"] as const;
+const VALID_TABS = ["overview", "tasks", "sessions", "jobs", "deployments", "activity"] as const;
 type ProjectTab = (typeof VALID_TABS)[number];
 
 export default function ProjectDetail() {
@@ -38,7 +36,6 @@ export default function ProjectDetail() {
   const activeTab: ProjectTab = VALID_TABS.includes(tab as ProjectTab) ? (tab as ProjectTab) : "overview";
   const { data: project, isLoading, isError, error } = trpc.projects.get.useQuery({ id });
   const { data: tasks = [] } = trpc.tasks.list.useQuery({ projectId: id });
-  const { data: specs = [] } = trpc.specifications.list.useQuery({ projectId: id });
   const { data: sessions = [] } = trpc.agentSessions.list.useQuery({ projectId: id });
   const { data: jobs = [] } = trpc.scheduledJobs.list.useQuery({ projectId: id });
   const { data: deployments = [] } = trpc.deployments.list.useQuery({ projectId: id });
@@ -226,37 +223,6 @@ export default function ProjectDetail() {
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>
-        ))}
-
-      {activeTab === "specs" &&
-        (specs.length === 0 ? (
-          <EmptyState text="No specifications for this project yet." />
-        ) : (
-          <Stack gap="xs">
-            {specs.map((s) => (
-              <Card key={s.id} withBorder padding="sm">
-                <Group justify="space-between">
-                  <div>
-                    <Anchor component={Link} to="/specifications" fw={600} size="sm">
-                      {s.filename}
-                    </Anchor>
-                    <Text size="xs" c="dimmed">
-                      {s.path}
-                    </Text>
-                  </div>
-                  <Group gap={6}>
-                    <Badge color={SPEC_STATUS_COLORS[s.status]} size="sm">
-                      {SPEC_STATUS_LABELS[s.status] ?? s.status}
-                    </Badge>
-                    <Badge variant="light">{s.category}</Badge>
-                  </Group>
-                </Group>
-                <Text size="sm" mt={4}>
-                  {s.summary}
-                </Text>
-              </Card>
-            ))}
-          </Stack>
         ))}
 
       {activeTab === "sessions" &&

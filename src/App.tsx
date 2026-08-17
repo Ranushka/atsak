@@ -4,7 +4,6 @@ import Overview from "./pages/Overview";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import AllTasks from "./pages/AllTasks";
-import Specifications from "./pages/Specifications";
 import ScheduledJobs from "./pages/ScheduledJobs";
 import AiSessions from "./pages/AiSessions";
 import Activity from "./pages/Activity";
@@ -29,7 +28,6 @@ export default function App() {
         <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/projects/:id/:tab" element={<ProjectDetail />} />
         <Route path="/tasks" element={<AllTasks />} />
-        <Route path="/specifications" element={<Specifications />} />
         <Route path="/jobs" element={<ScheduledJobs />} />
         <Route path="/sessions" element={<AiSessions />} />
         <Route path="/activity" element={<Activity />} />
