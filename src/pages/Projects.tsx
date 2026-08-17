@@ -146,7 +146,6 @@ export default function Projects() {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Name</Table.Th>
-                <Table.Th>Tech Stack</Table.Th>
                 <Table.Th>Tasks</Table.Th>
                 <Table.Th>Active Agent</Table.Th>
                 <Table.Th>Jobs</Table.Th>
@@ -167,15 +166,6 @@ export default function Projects() {
                       <Text size="xs" c="dimmed">
                         {p.githubRepo}
                       </Text>
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap={4} maw={220} wrap="wrap">
-                      {p.techStack.map((t) => (
-                        <Badge key={t} variant="light" size="sm">
-                          {t}
-                        </Badge>
-                      ))}
                     </Group>
                   </Table.Td>
                   <Table.Td>{p.openTaskCount} open</Table.Td>
