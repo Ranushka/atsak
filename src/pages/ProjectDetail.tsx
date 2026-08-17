@@ -18,7 +18,6 @@ import {
 import { IconBrandGithub, IconGitCommit, IconRobot } from "@tabler/icons-react";
 import { trpc } from "../lib/trpc";
 import { LoadingSkeleton, ErrorState, EmptyState } from "../components/DataStates";
-import ProjectSpecifications from "../components/ProjectSpecifications";
 import {
   TASK_STATUS_COLORS,
   TASK_STATUS_LABELS,
@@ -29,7 +28,7 @@ import {
   formatDuration,
 } from "../lib/badges";
 
-const VALID_TABS = ["overview", "tasks", "specs", "sessions", "jobs", "deployments", "activity"] as const;
+const VALID_TABS = ["overview", "tasks", "sessions", "jobs", "deployments", "activity"] as const;
 type ProjectTab = (typeof VALID_TABS)[number];
 
 export default function ProjectDetail() {
@@ -225,8 +224,6 @@ export default function ProjectDetail() {
             </Table>
           </Table.ScrollContainer>
         ))}
-
-      {activeTab === "specs" && <ProjectSpecifications projectId={id} />}
 
       {activeTab === "sessions" &&
         (sessions.length === 0 ? (
