@@ -32,6 +32,7 @@ import {
   formatRelativeTime,
 } from "../lib/badges";
 import { countUnapprovedSpecs, SpecApprovalGateModal } from "../components/SpecApprovalGate";
+import AttachmentsPanel from "../components/AttachmentsPanel";
 
 const STATUS_COLUMNS = ["backlog", "ready", "in_progress", "review", "blocked", "done"] as const;
 
@@ -340,6 +341,9 @@ function TaskDetailDrawer({ taskId, onClose }: { taskId: string | null; onClose:
           ) : (
             <Text size="sm">{task.dependsOnTaskIds.length} task(s) must complete first.</Text>
           )}
+
+          <Divider />
+          <AttachmentsPanel entityType="task" entityId={task.id} />
         </Stack>
       )}
       <SpecApprovalGateModal

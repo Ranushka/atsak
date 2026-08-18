@@ -15,12 +15,14 @@ import {
   Modal,
   SegmentedControl,
   Box,
+  Divider,
 } from "@mantine/core";
 import { IconSearch, IconFileText, IconPlus } from "@tabler/icons-react";
 import { trpc } from "../lib/trpc";
 import { LoadingSkeleton, ErrorState, EmptyState } from "./DataStates";
 import { SPEC_STATUS_COLORS, SPEC_STATUS_LABELS } from "../lib/badges";
 import { getSpecTemplate } from "../lib/specTemplates";
+import AttachmentsPanel from "./AttachmentsPanel";
 
 const CATEGORY_OPTIONS = [
   { value: "product", label: "Product" },
@@ -196,6 +198,9 @@ export default function ProjectSpecifications({ projectId }: { projectId: string
                     </Group>
                   </>
                 )}
+
+                <Divider />
+                <AttachmentsPanel entityType="specification" entityId={selectedSpec.id} />
               </Stack>
             )}
           </Paper>

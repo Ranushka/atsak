@@ -77,6 +77,20 @@ export const taskSpecifications = sqliteTable("task_specifications", {
   specificationId: text("specification_id").notNull().references(() => specifications.id, { onDelete: "cascade" }),
 });
 
+// Basic image attachments for specs and tasks. Stored inline as base64 in
+// SQLite rather than on disk — simplest thing that works for a self-hosted,
+// low-volume demo app; revisit (object storage / disk + static serving) if
+// attachment volume ever grows large.
+export const attachments = sqliteTable("attachments", {
+  id: text("id").primaryKey(),
+  entityType: text("entity_type").notNull(), // "specification" | "task"
+  entityId: text("entity_id").notNull(),
+  filename: text("filename").notNull(),
+  mimeType: text("mime_type").notNull(),
+  dataBase64: text("data_base64").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+});
+
 export const agentSessions = sqliteTable("agent_sessions", {
   id: text("id").primaryKey(),
   projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),

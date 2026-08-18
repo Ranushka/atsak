@@ -3,6 +3,7 @@ import { projectsRouter } from "./routers/projects.js";
 import { tasksRouter } from "./routers/tasks.js";
 import { taskDependenciesRouter } from "./routers/taskDependencies.js";
 import { specificationsRouter } from "./routers/specifications.js";
+import { attachmentsRouter } from "./routers/attachments.js";
 import { agentSessionsRouter } from "./routers/agentSessions.js";
 import { scheduledJobsRouter } from "./routers/scheduledJobs.js";
 import { jobRunsRouter } from "./routers/jobRuns.js";
@@ -17,6 +18,7 @@ export const appRouter = router({
   tasks: tasksRouter,
   taskDependencies: taskDependenciesRouter,
   specifications: specificationsRouter,
+  attachments: attachmentsRouter,
   agentSessions: agentSessionsRouter,
   scheduledJobs: scheduledJobsRouter,
   jobRuns: jobRunsRouter,
