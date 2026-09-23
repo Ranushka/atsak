@@ -1,0 +1,20 @@
+{
+  "name": "@qashio/tokens",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/tokens.css",
+  "exports": {
+    "./tokens.css": "./dist/tokens.css",
+    "./theme.css": "./dist/theme.css"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "echo \"no typecheck for tokens\"",
+    "test": "echo \"no tests for tokens\""
+  },
+  "devDependencies": {
+    "style-dictionary": "^5.0.4"
+  }
+}

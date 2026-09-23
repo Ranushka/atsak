@@ -1,10 +1,6 @@
 node_modules
 dist
-dist-server
-data/*.db
-data/*.db-journal
-data/*.db-wal
-data/*.db-shm
-.env
-.DS_Store
+.turbo
 *.log
+.DS_Store
+.changeset/pre.json

@@ -1,36 +1,29 @@
-# syntax=docker/dockerfile:1
-
-# ---- deps: install once, reused by build stage ----
-FROM node:20-bookworm-slim AS deps
+# --- build stage -----------------------------------------------------------
+FROM node:22-bookworm-slim AS build
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ \
-  && rm -rf /var/lib/apt/lists/*
-COPY package.json package-lock.json* ./
-RUN npm install
 
-# ---- build: compile the Vite client (server runs via tsx, no compile step needed) ----
-FROM deps AS build
-WORKDIR /app
+RUN corepack enable
+
+COPY package.json pnpm-workspace.yaml ./
+COPY packages/tokens/package.json packages/tokens/package.json
+COPY packages/ui/package.json packages/ui/package.json
+COPY packages/finance-ui/package.json packages/finance-ui/package.json
+COPY apps/playground/package.json apps/playground/package.json
+
+RUN pnpm install --frozen-lockfile
+
 COPY . .
-RUN npm run build
 
-# ---- runtime: slim image with only what's needed to run ----
-FROM node:20-bookworm-slim AS runtime
-WORKDIR /app
-ENV NODE_ENV=production
-ENV PORT=3800
+RUN pnpm build:playground
 
-# better-sqlite3 needs a couple of runtime libs on slim images
-RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ \
-  && rm -rf /var/lib/apt/lists/*
+# --- serve stage -------------------------------------------------------------
+FROM nginx:1.27-alpine AS serve
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY package.json ./
-COPY server ./server
-COPY --from=build /app/dist ./dist
+COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/apps/playground/dist /usr/share/nginx/html
 
-RUN mkdir -p /app/data
-VOLUME ["/app/data"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1/healthz || exit 1
 
-EXPOSE 3800
-CMD ["npm", "run", "start"]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

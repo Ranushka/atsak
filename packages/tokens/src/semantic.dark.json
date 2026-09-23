@@ -1,0 +1,45 @@
+{
+  "background": { "$type": "color", "$value": "{color.neutral.950}" },
+  "foreground": { "$type": "color", "$value": "{color.neutral.50}" },
+  "surface": { "$type": "color", "$value": "{color.neutral.900}" },
+  "card": {
+    "$value": "{color.neutral.900}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.neutral.50}" }
+  },
+  "popover": {
+    "$value": "{color.neutral.900}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.neutral.50}" }
+  },
+  "primary": {
+    "$value": "{color.neutral.50}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.neutral.900}" }
+  },
+  "brand": {
+    "$value": "{color.gold.400}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.neutral.950}" },
+    "subtle": { "$type": "color", "$value": "{color.gold.950}" }
+  },
+  "secondary": {
+    "$value": "{color.neutral.800}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.neutral.50}" }
+  },
+  "muted": {
+    "$value": "{color.neutral.800}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.neutral.400}" }
+  },
+  "accent": { "$type": "color", "$value": "{color.neutral.800}" },
+  "destructive": { "$type": "color", "$value": "{color.red.500}" },
+  "border": { "$type": "color", "$value": "{color.neutral.800}" },
+  "input": { "$type": "color", "$value": "{color.neutral.800}" },
+  "ring": { "$type": "color", "$value": "{color.gold.400}" },
+  "success": { "$type": "color", "$value": "{color.green.500}", "subtle": { "$type": "color", "$value": "{color.green.950}" } },
+  "warning": { "$type": "color", "$value": "{color.amber.500}", "subtle": { "$type": "color", "$value": "{color.amber.950}" } },
+  "danger": { "$type": "color", "$value": "{color.red.500}", "subtle": { "$type": "color", "$value": "{color.red.950}" } },
+  "info": { "$type": "color", "$value": "{color.blue.500}", "subtle": { "$type": "color", "$value": "{color.blue.950}" } }
+}

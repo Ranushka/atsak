@@ -1,0 +1,45 @@
+{
+  "background": { "$type": "color", "$value": "{color.white}" },
+  "foreground": { "$type": "color", "$value": "{color.neutral.950}" },
+  "surface": { "$type": "color", "$value": "{color.neutral.50}" },
+  "card": {
+    "$value": "{color.white}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.neutral.950}" }
+  },
+  "popover": {
+    "$value": "{color.white}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.neutral.950}" }
+  },
+  "primary": {
+    "$value": "{color.neutral.900}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.white}" }
+  },
+  "brand": {
+    "$value": "{color.gold.600}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.white}" },
+    "subtle": { "$type": "color", "$value": "{color.gold.50}" }
+  },
+  "secondary": {
+    "$value": "{color.neutral.100}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.neutral.900}" }
+  },
+  "muted": {
+    "$value": "{color.neutral.100}",
+    "$type": "color",
+    "foreground": { "$type": "color", "$value": "{color.neutral.500}" }
+  },
+  "accent": { "$type": "color", "$value": "{color.neutral.100}" },
+  "destructive": { "$type": "color", "$value": "{color.red.600}" },
+  "border": { "$type": "color", "$value": "{color.neutral.200}" },
+  "input": { "$type": "color", "$value": "{color.neutral.200}" },
+  "ring": { "$type": "color", "$value": "{color.gold.400}" },
+  "success": { "$type": "color", "$value": "{color.green.600}", "subtle": { "$type": "color", "$value": "{color.green.50}" } },
+  "warning": { "$type": "color", "$value": "{color.amber.600}", "subtle": { "$type": "color", "$value": "{color.amber.50}" } },
+  "danger": { "$type": "color", "$value": "{color.red.600}", "subtle": { "$type": "color", "$value": "{color.red.50}" } },
+  "info": { "$type": "color", "$value": "{color.blue.600}", "subtle": { "$type": "color", "$value": "{color.blue.50}" } }
+}

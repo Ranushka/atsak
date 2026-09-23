@@ -1,167 +1,84 @@
-# Atsak
+# Qashio Design System
 
-A self-hosted dashboard for managing multiple software projects developed with
-AI coding agents (Claude Code, Codex, etc). One control center for several
-GitHub projects: tasks, specs, agent sessions, and scheduled cron jobs.
+A reusable React + Tailwind CSS v4 design system for Qashio (a UAE/KSA corporate-card and
+spend-management fintech), organised by Atomic Design: tokens → atoms → molecules →
+organisms → templates → pages.
 
-## Stack
+Built entirely on MIT-licensed open source (Radix UI, TanStack Table, Lucide, Tailwind v4,
+Style Dictionary, CVA, clsx, tailwind-merge) — Qashio owns the code outright. There is no
+Storybook; the `apps/playground` app doubles as the living component gallery and demo.
+RTL (Arabic) and dark mode are supported from day one.
 
-- **Vite + React + TypeScript** — client app
-- **Mantine UI v7** for all styling (near-zero custom CSS, no Tailwind)
-- **tRPC** (server + client) + **TanStack Query** for all data access
-- **SQLite + Drizzle ORM** (via `better-sqlite3`) for storage
-- **Tabler Icons** (`@tabler/icons-react`)
-- Responsive: desktop tables, mobile cards; light/dark mode via Mantine color scheme
+## Packages
 
-## Architecture
-
-Single repo, two halves, one process in production:
-
-- `server/` — Express + tRPC HTTP server (`/trpc`), Drizzle ORM against a local
-  SQLite file at `data/atsak.db` (gitignored). Runs via `tsx` in both dev and
-  prod — no separate server build/compile step.
-- `src/` — Vite React app, Mantine `AppShell` with a collapsible sidebar,
-  talking to the server via `@trpc/client` + `@trpc/react-query`.
-
-In production the Node server also serves the built client as static files
-from `dist/`, so the whole app runs as a single process on a single port
-(`3800` by default) — this is what makes the Docker image a single container.
+| Package | What it is |
+| --- | --- |
+| `@qashio/tokens` | DTCG design tokens (primitives + light/dark semantic), built to CSS custom properties and a Tailwind v4 `@theme` mapping with Style Dictionary. |
+| `@qashio/ui` | Generic, brand-agnostic components: atoms, molecules, organisms, and one admin template. |
+| `@qashio/finance-ui` | Qashio-specific domain components: `Amount`, `StatusPill`, `CardMask`, country flags/pills. |
+| `apps/playground` | Vite + React demo app recreating the Qashio 360 admin shell, used instead of Storybook. |
 
 ## Getting started
 
 ```bash
-npm install
-npm run dev       # runs server (tsx watch, :3800) + Vite client (:3801) concurrently
+corepack enable
+pnpm install
+pnpm build          # builds packages/* (tokens → ui → finance-ui)
+pnpm test            # 17 unit tests across ui + finance-ui
+pnpm typecheck
 ```
 
-The client dev server proxies `/trpc` requests to `:3800`, so open
-`http://localhost:3801`. On first boot, if the SQLite database is empty, the
-server automatically seeds it with realistic demo data (5 projects, ~23 tasks,
-specs, agent sessions, scheduled jobs + run history, deployments, activity).
-You can also reseed manually at any time:
+## Run locally
 
 ```bash
-npm run db:seed
+pnpm dev             # builds packages, then starts the playground on :5173
 ```
 
-Note: reseeding **replaces** all existing data (it's a demo-data reset, not a
-migration).
+Open http://localhost:5173 — it defaults to `#/companies-pending-kyb`. Toggle theme and
+direction from the gear icon at the bottom of the app rail.
 
-### Two-terminal alternative
+## Deployment
 
-If you'd rather not use `concurrently`:
+Ships as a static site behind nginx. `pnpm build:playground` builds every package and then
+the playground's `dist/`. The `Dockerfile` is a two-stage build (Node for the build, nginx
+for serving); `docker-compose.yml` defines a single `web` service with no host ports.
+
+Hosted on the home Dokploy instance as a Compose app. `atsak.ranu.win` points to the `web`
+service on port 80 with Let's Encrypt HTTPS; auto-deploy runs on push via a Git webhook.
+
+## Using it in another project
 
 ```bash
-# terminal 1
-npm run dev:server
-# terminal 2
-npm run dev:client
+pnpm add @qashio/tokens @qashio/ui @qashio/finance-ui
 ```
 
-## Build & run in production (single process)
+```tsx
+import "@qashio/ui/styles.css";
+import { QdsProvider, Button } from "@qashio/ui";
+
+function App() {
+  return (
+    <QdsProvider dir="ltr">
+      <Button variant="brand">Approve</Button>
+    </QdsProvider>
+  );
+}
+```
+
+Your app's Tailwind v4 build must be able to see classes used inside `@qashio/ui` /
+`@qashio/finance-ui` — either via Tailwind's automatic source detection through your bundler,
+or by adding explicit `@source` directives pointing at those packages.
+
+## Publishing with Changesets
 
 ```bash
-npm run build   # builds the Vite client into dist/
-npm run start   # NODE_ENV=production, serves dist/ + /trpc on :3800 (via tsx)
+pnpm changeset          # describe the change
+pnpm version-packages    # bump versions + changelogs
+pnpm release             # build then `changeset publish`
 ```
 
-Then open `http://localhost:3800`.
+`tokens`, `ui`, and `finance-ui` are version-linked (see `.changeset/config.json`) so they
+always ship together; `apps/playground` is excluded from releases.
 
-## Docker
-
-Multi-stage build: installs deps once, builds the client, then ships a slim
-runtime image that runs the same single Node process (server + static client)
-on port `3800`, with a named volume for the SQLite data directory.
-
-```bash
-docker build -t atsak .
-docker run -p 3800:3800 -v atsak-data:/app/data atsak
-
-# or, simpler:
-docker compose up -d
-```
-
-`docker-compose.yml` exposes only port `3800` and persists `data/` in a named
-volume (`atsak-data`) so the SQLite file survives container recreation.
-
-## Typecheck
-
-```bash
-npm run typecheck   # client + server, no emit
-```
-
-## Database schema at a glance
-
-All tables live in `server/db/schema.ts` (Drizzle) and are created directly
-via `ensureSchema()` on boot (no migration files — fine for a self-hosted,
-single-tenant app).
-
-| Table | Purpose |
-|---|---|
-| `projects` | Tracked GitHub repos: name, repo, tech stack, milestone, deployment status/url |
-| `tasks` | Work items: status/priority/type, labels, assignee (human or agent name), GitHub issue/branch/PR links, acceptance criteria (JSON checklist), agent execution status |
-| `task_dependencies` | Task → task "depends on" edges |
-| `specifications` | Spec file metadata (filename/path/category/branch) **+ a cached `content` column** for the demo (see tradeoff note below) |
-| `task_specifications` | Task ↔ specification join table |
-| `agent_sessions` | AI agent runs: agent, branch, status, duration, last output, PR url, token usage, cost |
-| `scheduled_jobs` | Cron jobs: expression, timezone, command, enabled flag, last/next run, failure count, status |
-| `job_runs` | Execution history per scheduled job (duration, exit status, logs) |
-| `deployments` | Deploy history per project/environment |
-| `activities` | Global activity feed, optionally linked to a task |
-| `settings` | Simple key/value app settings (default timezone, GitHub token placeholder, app name) |
-
-**Tradeoff note on `specifications.content`:** in a real integration, spec
-markdown bodies would live in the project's own GitHub repo and be fetched
-(and maybe cached with a TTL) on demand — this DB is meant to stay a
-lightweight metadata index, not a source-code mirror. For this self-hosted
-demo we also persist the markdown in a `content` column purely so the
-Specifications page has something real to render without wiring actual
-GitHub API calls. Treat it as a cache, not the source of truth.
-
-## GitHub integration (mocked)
-
-`server/github/adapter.ts` defines a typed `GitHubAdapter` interface
-(`listIssues`, `listBranches`, `listPullRequests`, `listWorkflowRuns`,
-`listRecentCommits`) with a `MockGitHubAdapter` implementation that generates
-plausible, deterministic fake data per repo (seeded by a hash of the repo
-name, so results are stable across reloads). It's wired behind the `github`
-tRPC router, so a real Octokit-backed adapter can be swapped in later without
-touching any callers. **No real network calls to GitHub are made in this
-pass.**
-
-## tRPC routers
-
-One router per table (`server/trpc/routers/*.ts`), plus a `dashboard` router
-for the Overview page's aggregate stats and a `github` router for the mock
-adapter. Full CRUD on `projects`, `tasks`, and `scheduledJobs`; read (+ a
-couple of targeted mutations like status updates, run-now, enable/disable,
-task-spec linking) on the rest, matching what the UI actually needs.
-
-## Pages
-
-Overview · Projects · Project detail (tabs: Overview/Tasks/Specifications/AI
-Sessions/Scheduled Jobs/Deployments/Activity) · All Tasks (Kanban + table
-toggle, filters, task detail drawer) · Specifications (file tree + markdown
-editor/preview) · Scheduled Jobs (table/cards, run-now, enable/disable, run
-history drawer) · AI Sessions (start/stop/reopen, log viewer) · Activity
-(global feed, filterable) · Settings.
-
-## Notable deviations / implementation notes
-
-- **Server runs via `tsx` in both dev and prod**, rather than compiling with
-  `tsc` to a separate `dist-server/`. `tsx` is fast (esbuild-based) and this
-  sidesteps ESM/CommonJS interop friction between `"type": "module"` and a
-  `tsc`-compiled output. The Docker image ships `tsx` as a normal dependency
-  and runs `npm run start` (`tsx server/index.ts`) as its `CMD`.
-- **`superjson`** is used as the tRPC transformer so `Date` objects round-trip
-  correctly between server and client instead of arriving as raw ISO strings.
-- **Cron-to-English** is a small hand-written helper (`src/lib/cronToEnglish.ts`)
-  covering the common patterns used by the seeded jobs (every N minutes/hours,
-  daily/weekly/monthly at HH:MM), rather than pulling in a heavy npm package,
-  per the spec's preference.
-- Kanban drag-and-drop was intentionally skipped in favor of a per-card status
-  `Select` dropdown, as explicitly allowed by the spec ("drag not required").
-- Drizzle tables are created directly via a `CREATE TABLE IF NOT EXISTS`
-  bootstrap (`ensureSchema()`) rather than a migrations pipeline — appropriate
-  for a single-tenant, self-hosted app with no need for a live upgrade path
-  across schema versions yet.
+See also [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) for the atomic structure and Figma→code
+workflow, and [`PLAN.md`](./PLAN.md) for status and roadmap.

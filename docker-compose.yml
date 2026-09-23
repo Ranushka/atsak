@@ -1,18 +1,6 @@
 services:
-  atsak:
-    build: .
-    image: atsak:latest
-    container_name: atsak
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
-    ports:
-      - "3800:3800"
-    environment:
-      - NODE_ENV=production
-      - PORT=3800
-    volumes:
-      - atsak-data:/app/data
-
-volumes:
-  atsak-data:
-    external: true
-    name: repo_atsak-data
