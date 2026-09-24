@@ -237,9 +237,11 @@ export function CompaniesPage({ statusFilter }: CompaniesPageProps) {
         columnVisibility={columnVisibility}
         onColumnVisibilityChange={setColumnVisibility}
         emptyMessage="No companies match your filters."
+        maxHeight="60vh"
       />
 
       <TablePagination
+        className="shrink-0"
         total={filtered.length}
         page={page}
         pageSize={pageSize}

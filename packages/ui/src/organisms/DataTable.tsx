@@ -44,6 +44,12 @@ export interface DataTableProps<TData> {
   emptyMessage?: React.ReactNode;
   getRowId?: (row: TData, index: number) => string;
   className?: string;
+  /**
+   * Caps the table body's height and makes it scroll internally (sticky header stays put)
+   * instead of letting the table grow with row count and push the pagination footer off
+   * screen. Accepts any CSS height value, e.g. "60vh" or "480px".
+   */
+  maxHeight?: string;
 }
 
 export function DataTable<TData>({
@@ -61,6 +67,7 @@ export function DataTable<TData>({
   emptyMessage = "No results.",
   getRowId,
   className,
+  maxHeight,
 }: DataTableProps<TData>) {
   const allColumns = React.useMemo<ColumnDef<TData, any>[]>(() => {
     if (!selectable) return columns;
@@ -110,7 +117,10 @@ export function DataTable<TData>({
   const rows = table.getRowModel().rows;
 
   return (
-    <div className={cn("relative w-full overflow-auto rounded-md border border-border", className)}>
+    <div
+      className={cn("relative w-full overflow-auto rounded-md border border-border", className)}
+      style={maxHeight ? { maxHeight } : undefined}
+    >
       <table className="w-full caption-bottom text-sm">
         <thead className="sticky top-0 z-10 bg-surface">
           {table.getHeaderGroups().map((headerGroup) => (
