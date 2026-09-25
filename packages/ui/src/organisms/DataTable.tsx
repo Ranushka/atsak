@@ -10,6 +10,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { cva, type VariantProps } from "class-variance-authority";
 import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff, MoreVertical } from "lucide-react";
 import { cn } from "../lib/cn";
 import { Checkbox } from "../atoms/Checkbox";
@@ -28,6 +29,28 @@ declare module "@tanstack/react-table" {
     align?: "start" | "end";
   }
 }
+
+const dataTableHeaderVariants = cva("whitespace-nowrap font-medium text-muted-foreground", {
+  variants: {
+    size: {
+      sm: "h-8 px-2 text-xs",
+      md: "h-10 px-3 text-xs",
+      lg: "h-12 px-4 text-sm",
+    },
+  },
+  defaultVariants: { size: "md" },
+});
+
+const dataTableCellVariants = cva("align-middle", {
+  variants: {
+    size: {
+      sm: "px-2 py-1 text-xs",
+      md: "px-3 py-2 text-sm",
+      lg: "px-4 py-3 text-sm",
+    },
+  },
+  defaultVariants: { size: "md" },
+});
 
 export interface DataTableProps<TData> {
   columns: ColumnDef<TData, any>[];
@@ -50,7 +73,11 @@ export interface DataTableProps<TData> {
    * screen. Accepts any CSS height value, e.g. "60vh" or "480px".
    */
   maxHeight?: string;
+  /** Row/header density. Defaults to "md". */
+  size?: DataTableSize;
 }
+
+export type DataTableSize = NonNullable<VariantProps<typeof dataTableCellVariants>["size"]>;
 
 export function DataTable<TData>({
   columns,
@@ -68,6 +95,7 @@ export function DataTable<TData>({
   getRowId,
   className,
   maxHeight,
+  size = "md",
 }: DataTableProps<TData>) {
   const allColumns = React.useMemo<ColumnDef<TData, any>[]>(() => {
     if (!selectable) return columns;
@@ -134,10 +162,7 @@ export function DataTable<TData>({
                   <th
                     key={header.id}
                     style={width ? { width } : undefined}
-                    className={cn(
-                      "h-10 whitespace-nowrap px-3 text-xs font-medium text-muted-foreground",
-                      align === "end" ? "text-end" : "text-start"
-                    )}
+                    className={cn(dataTableHeaderVariants({ size }), align === "end" ? "text-end" : "text-start")}
                   >
                     {header.isPlaceholder ? null : (
                       <div className={cn("flex items-center gap-1", align === "end" && "justify-end")}>
@@ -207,7 +232,7 @@ export function DataTable<TData>({
                     <td
                       key={cell.id}
                       dir="auto"
-                      className={cn("px-3 py-2 align-middle", align === "end" ? "text-end" : "text-start")}
+                      className={cn(dataTableCellVariants({ size }), align === "end" ? "text-end" : "text-start")}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>

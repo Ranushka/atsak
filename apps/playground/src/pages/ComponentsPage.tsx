@@ -67,6 +67,13 @@ export function ComponentsPage() {
               )
             )}
           </Section>
+          <Section title="Badge sizes">
+            {(["sm", "md", "lg"] as const).map((s) => (
+              <Badge key={s} tone="brand" size={s}>
+                {s}
+              </Badge>
+            ))}
+          </Section>
           <Section title="Input & Label">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="demo-input">Email</Label>
@@ -80,6 +87,11 @@ export function ComponentsPage() {
           <Section title="Checkbox & Switch">
             <Checkbox checked={checked} onCheckedChange={setChecked} />
             <Switch checked={on} onCheckedChange={setOn} />
+          </Section>
+          <Section title="Switch sizes">
+            {(["sm", "md", "lg"] as const).map((s) => (
+              <Switch key={s} size={s} checked={on} onCheckedChange={setOn} />
+            ))}
           </Section>
           <Section title="Tooltip">
             <Tooltip content="A helpful hint">
