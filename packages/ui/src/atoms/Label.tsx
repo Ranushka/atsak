@@ -16,3 +16,10 @@ export const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
   )
 );
 Label.displayName = "Label";
+
+/* __DOC
+<div className="flex flex-col gap-1.5">
+  <QDS.Label htmlFor="demo-label-input">Email</QDS.Label>
+  <QDS.Input id="demo-label-input" placeholder="you@qashio.com" />
+</div>
+DOC__ */

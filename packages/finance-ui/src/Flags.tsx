@@ -24,3 +24,8 @@ export function FlagSA({ title = "Saudi Arabia", className, ...props }: FlagProp
     </svg>
   );
 }
+
+/* __DOC
+<Finance.FlagAE className="h-6 w-9 rounded" />
+<Finance.FlagSA className="h-6 w-9 rounded" />
+DOC__ */

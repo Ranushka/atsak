@@ -33,3 +33,22 @@ export interface BadgeProps
 export function Badge({ className, tone, size, ...props }: BadgeProps) {
   return <span className={cn(badgeVariants({ tone, size }), className)} {...props} />;
 }
+
+/* __DOC
+<div className="flex flex-col gap-3">
+  <div className="flex flex-wrap items-center gap-2">
+    {(["neutral", "brand", "brand-subtle", "success", "warning", "danger", "info", "outline"] as const).map((t) => (
+      <QDS.Badge key={t} tone={t}>
+        {t}
+      </QDS.Badge>
+    ))}
+  </div>
+  <div className="flex flex-wrap items-center gap-2">
+    {(["sm", "md", "lg"] as const).map((s) => (
+      <QDS.Badge key={s} tone="brand" size={s}>
+        {s}
+      </QDS.Badge>
+    ))}
+  </div>
+</div>
+DOC__ */

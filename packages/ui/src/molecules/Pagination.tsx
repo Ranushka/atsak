@@ -92,3 +92,10 @@ export function Pagination({ page, pageCount, onPageChange, siblingCount = 1, cl
     </nav>
   );
 }
+
+/* __DOC
+{(function Demo() {
+  const [page, setPage] = React.useState(4);
+  return <QDS.Pagination page={page} pageCount={12} onPageChange={setPage} />;
+})()}
+DOC__ */

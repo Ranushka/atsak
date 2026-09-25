@@ -4,8 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/generate-components-page.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/generate-components-page.mjs",
     "build": "vite build",
+    "docs:gen": "node scripts/generate-components-page.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"no tests for playground\""
   },

@@ -32,3 +32,8 @@ export const Avatar = React.forwardRef<React.ElementRef<typeof RadixAvatar.Root>
   )
 );
 Avatar.displayName = "Avatar";
+
+/* __DOC
+<QDS.Avatar name="Admin User" />
+<QDS.Avatar name="Sara Al Farsi" />
+DOC__ */

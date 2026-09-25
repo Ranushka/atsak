@@ -43,3 +43,19 @@ export const Switch = React.forwardRef<React.ElementRef<typeof RadixSwitch.Root>
   )
 );
 Switch.displayName = "Switch";
+
+/* __DOC
+{(function Demo() {
+  const [on, setOn] = React.useState(true);
+  return (
+    <div className="flex flex-col gap-3">
+      <QDS.Switch checked={on} onCheckedChange={setOn} />
+      <div className="flex items-center gap-4">
+        {(["sm", "md", "lg"] as const).map((s) => (
+          <QDS.Switch key={s} size={s} checked={on} onCheckedChange={setOn} />
+        ))}
+      </div>
+    </div>
+  );
+})()}
+DOC__ */

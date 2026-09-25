@@ -17,3 +17,7 @@ export function Spinner({ className, size = 16, ...props }: SpinnerProps) {
     />
   );
 }
+
+/* __DOC
+<QDS.Spinner />
+DOC__ */

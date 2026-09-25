@@ -69,3 +69,21 @@ export function TablePagination({
     </div>
   );
 }
+
+/* __DOC_BLOCK
+{(function Demo() {
+  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
+  return (
+    <div className="p-4">
+      <QDS.TablePagination
+        total={42}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
+    </div>
+  );
+})()}
+DOC__ */

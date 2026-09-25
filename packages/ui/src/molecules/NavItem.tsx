@@ -28,3 +28,13 @@ export const NavItem = React.forwardRef<HTMLAnchorElement, NavItemProps>(
   )
 );
 NavItem.displayName = "NavItem";
+
+/* __DOC
+<div className="flex flex-col gap-0.5 p-2">
+  <QDS.NavItem icon={<Icons.Home className="size-4" />} active>
+    Home
+  </QDS.NavItem>
+  <QDS.NavItem icon={<Icons.Users className="size-4" />}>Companies</QDS.NavItem>
+  <QDS.NavItem indent={1}>Active</QDS.NavItem>
+</div>
+DOC__ */

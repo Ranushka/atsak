@@ -252,3 +252,27 @@ export function DataTable<TData>({
     </div>
   );
 }
+
+/* __DOC_BLOCK
+{(function Demo() {
+  const rows = [
+    { name: "Saeed Al Zaabi", role: "Owner", status: "active" },
+    { name: "Khalid Al Farsi", role: "Finance", status: "pending_kyb" },
+    { name: "Yusuf Al Suwaidi", role: "Admin", status: "active" },
+  ];
+  const columns = [
+    { accessorKey: "name", header: "Name" },
+    { accessorKey: "role", header: "Role" },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ getValue }: any) => <Finance.StatusPill status={getValue()} />,
+    },
+  ];
+  return (
+    <div className="p-4">
+      <QDS.DataTable columns={columns as any} data={rows} getRowId={(row) => row.name} />
+    </div>
+  );
+})()}
+DOC__ */

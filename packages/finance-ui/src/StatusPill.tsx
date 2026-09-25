@@ -34,3 +34,9 @@ export function StatusPill({ status, statuses = defaultStatuses, className }: St
     </Badge>
   );
 }
+
+/* __DOC
+{(["active", "pending_kyb", "in_review", "rejected", "frozen"] as const).map((s) => (
+  <Finance.StatusPill key={s} status={s} />
+))}
+DOC__ */

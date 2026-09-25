@@ -38,3 +38,9 @@ export function Tooltip({ content, children, side = "top" }: TooltipProps) {
     </RadixTooltip.Root>
   );
 }
+
+/* __DOC
+<QDS.Tooltip content="A helpful hint">
+  <QDS.Button variant="outline">Hover me</QDS.Button>
+</QDS.Tooltip>
+DOC__ */

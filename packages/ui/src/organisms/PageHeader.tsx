@@ -27,3 +27,13 @@ export function PageHeader({ icon, title, description, actions, className }: Pag
     </div>
   );
 }
+
+/* __DOC_BLOCK
+<QDS.PageHeader
+  className="p-4"
+  icon={<Icons.Users className="size-5" />}
+  title="Companies"
+  description="Manage onboarded and prospective companies."
+  actions={<QDS.Button variant="brand">Create</QDS.Button>}
+/>
+DOC__ */

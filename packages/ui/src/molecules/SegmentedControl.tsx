@@ -40,3 +40,19 @@ export function SegmentedControl({ options, value, onChange, className }: Segmen
     </ToggleGroup.Root>
   );
 }
+
+/* __DOC
+{(function Demo() {
+  const [segment, setSegment] = React.useState("a");
+  return (
+    <QDS.SegmentedControl
+      value={segment}
+      onChange={setSegment}
+      options={[
+        { value: "a", label: "Recent" },
+        { value: "b", label: "All" },
+      ]}
+    />
+  );
+})()}
+DOC__ */

@@ -19,3 +19,9 @@ export const Separator = React.forwardRef<
   />
 ));
 Separator.displayName = "Separator";
+
+/* __DOC
+<div className="flex h-8 items-center gap-2">
+  Left <QDS.Separator orientation="vertical" /> Right
+</div>
+DOC__ */

@@ -17,3 +17,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
   )
 );
 SearchInput.displayName = "SearchInput";
+
+/* __DOC
+<QDS.SearchInput placeholder="Search…" className="w-64" />
+DOC__ */

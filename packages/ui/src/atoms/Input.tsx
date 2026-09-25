@@ -16,3 +16,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   )
 );
 Input.displayName = "Input";
+
+/* __DOC
+<QDS.Input placeholder="you@qashio.com" />
+DOC__ */

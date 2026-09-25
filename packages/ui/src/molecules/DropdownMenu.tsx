@@ -112,6 +112,18 @@ export const DropdownMenuSeparator = React.forwardRef<
 ));
 DropdownMenuSeparator.displayName = "DropdownMenuSeparator";
 
+/* __DOC
+<QDS.DropdownMenuRoot>
+  <QDS.DropdownMenuTrigger asChild>
+    <QDS.Button variant="outline">Open menu</QDS.Button>
+  </QDS.DropdownMenuTrigger>
+  <QDS.DropdownMenuContent>
+    <QDS.DropdownMenuItem>Edit</QDS.DropdownMenuItem>
+    <QDS.DropdownMenuItem destructive>Delete</QDS.DropdownMenuItem>
+  </QDS.DropdownMenuContent>
+</QDS.DropdownMenuRoot>
+DOC__ */
+
 export const DropdownMenuSub = RadixDropdownMenu.Sub;
 export const DropdownMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof RadixDropdownMenu.SubTrigger>,

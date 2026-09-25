@@ -20,3 +20,10 @@ export function Topbar({ start, end, className }: TopbarProps) {
     </header>
   );
 }
+
+/* __DOC_BLOCK
+<QDS.Topbar
+  start={<QDS.SearchInput placeholder="Ask Qashio…" className="max-w-xs" />}
+  end={<QDS.Avatar name="Admin User" />}
+/>
+DOC__ */

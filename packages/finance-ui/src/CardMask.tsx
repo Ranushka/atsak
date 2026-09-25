@@ -14,3 +14,7 @@ export function CardMask({ last4, className }: CardMaskProps) {
     </span>
   );
 }
+
+/* __DOC
+<Finance.CardMask last4="4242" />
+DOC__ */

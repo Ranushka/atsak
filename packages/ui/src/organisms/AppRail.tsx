@@ -50,3 +50,19 @@ export function AppRail({ logo, items, footer, className }: AppRailProps) {
     </div>
   );
 }
+
+/* __DOC
+<div className="h-72 overflow-hidden rounded-lg border border-border">
+  <QDS.AppRail
+    logo={
+      <div className="flex size-9 items-center justify-center rounded-lg border-2 border-brand text-brand">
+        <Icons.Package className="size-5" />
+      </div>
+    }
+    items={[
+      { id: "ai", label: "AI Assistant", icon: <Icons.Sparkles className="size-5" />, active: true },
+      { id: "analytics", label: "Analytics", icon: <Icons.LineChart className="size-5" /> },
+    ]}
+  />
+</div>
+DOC__ */

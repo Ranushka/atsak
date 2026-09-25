@@ -27,3 +27,8 @@ export function CountryPill({ code, className }: CountryPillProps) {
     </span>
   );
 }
+
+/* __DOC
+<Finance.CountryPill code="AE" />
+<Finance.CountryPill code="SA" />
+DOC__ */

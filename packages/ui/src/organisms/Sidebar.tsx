@@ -139,3 +139,32 @@ function SidebarTree({
     </ul>
   );
 }
+
+/* __DOC
+{(function Demo() {
+  const [activeId, setActiveId] = React.useState("home");
+  const items = [
+    { id: "home", label: "Home", icon: <Icons.Home className="size-4" /> },
+    {
+      id: "companies",
+      label: "Companies",
+      icon: <Icons.Users className="size-4" />,
+      children: [
+        { id: "active", label: "Active" },
+        { id: "pending", label: "Pending KYB" },
+      ],
+    },
+    { id: "reports", label: "Reports", icon: <Icons.LineChart className="size-4" /> },
+  ];
+  return (
+    <div className="h-72 overflow-hidden rounded-lg border border-border">
+      <QDS.Sidebar
+        items={items}
+        activeId={activeId}
+        onNavigate={(id) => setActiveId(id)}
+        header={<span className="text-sm font-semibold">Qashio 360</span>}
+      />
+    </div>
+  );
+})()}
+DOC__ */

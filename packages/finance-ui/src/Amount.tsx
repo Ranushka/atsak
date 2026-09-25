@@ -47,3 +47,9 @@ export function Amount({ value, signed, className, ...options }: AmountProps) {
     </span>
   );
 }
+
+/* __DOC
+<Finance.Amount value={125430.5} />
+<Finance.Amount value={-4200} signed />
+<Finance.Amount value={null} />
+DOC__ */

@@ -26,3 +26,10 @@ export const Checkbox = React.forwardRef<React.ElementRef<typeof RadixCheckbox.R
   )
 );
 Checkbox.displayName = "Checkbox";
+
+/* __DOC
+{(function Demo() {
+  const [checked, setChecked] = React.useState<boolean | "indeterminate">(true);
+  return <QDS.Checkbox checked={checked} onCheckedChange={setChecked} />;
+})()}
+DOC__ */

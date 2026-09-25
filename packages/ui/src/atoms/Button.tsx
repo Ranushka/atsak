@@ -54,3 +54,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 Button.displayName = "Button";
+
+/* __DOC
+{(["primary", "brand", "secondary", "outline", "brand-outline", "ghost", "destructive", "link"] as const).map((v) => (
+  <QDS.Button key={v} variant={v}>
+    {v}
+  </QDS.Button>
+))}
+DOC__ */
