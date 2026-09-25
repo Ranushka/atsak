@@ -123,8 +123,9 @@ export function CompaniesPage({ statusFilter }: CompaniesPageProps) {
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-4">
       <PageHeader
+        className="shrink-0"
         icon={<Users className="size-5" />}
         title="Companies"
         description="Manage onboarded and prospective Qashio companies."
@@ -150,7 +151,7 @@ export function CompaniesPage({ statusFilter }: CompaniesPageProps) {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
         <SearchInput
           placeholder="Search companies…"
           className="w-64"
@@ -237,7 +238,7 @@ export function CompaniesPage({ statusFilter }: CompaniesPageProps) {
         columnVisibility={columnVisibility}
         onColumnVisibilityChange={setColumnVisibility}
         emptyMessage="No companies match your filters."
-        maxHeight="60vh"
+        className="min-h-0 flex-1"
       />
 
       <TablePagination
