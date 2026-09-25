@@ -10,6 +10,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   QdsProvider,
   SearchInput,
@@ -32,6 +34,8 @@ import {
   Workflow,
 } from "lucide-react";
 import { useThemeDir } from "./useThemeDir";
+import { useDensity, type Density } from "./useDensity";
+import { DensityPreview } from "./DensityPreview";
 
 const navItems: SidebarNode[] = [
   { id: "home", label: "Home", icon: <Home className="size-4" /> },
@@ -68,6 +72,7 @@ export interface ShellProps {
 
 export function Shell({ activeId, onNavigate, children }: ShellProps) {
   const { theme, setTheme, dir, setDir } = useThemeDir();
+  const { density, setDensity } = useDensity();
 
   return (
     <QdsProvider dir={dir}>
@@ -96,7 +101,7 @@ export function Shell({ activeId, onNavigate, children }: ShellProps) {
                     <Settings className="size-5" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent side="right" align="end">
+                <DropdownMenuContent side="right" align="end" className="w-64">
                   <DropdownMenuLabel>Theme</DropdownMenuLabel>
                   <DropdownMenuItem onSelect={() => setTheme("light")}>
                     Light {theme === "light" && <Badge tone="brand-subtle">On</Badge>}
@@ -112,6 +117,18 @@ export function Shell({ activeId, onNavigate, children }: ShellProps) {
                   <DropdownMenuItem onSelect={() => setDir("rtl")}>
                     RTL {dir === "rtl" && <Badge tone="brand-subtle">On</Badge>}
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Density</DropdownMenuLabel>
+                  <DropdownMenuRadioGroup value={density} onValueChange={(v) => setDensity(v as Density)}>
+                    {(["default", "comfortable", "compact"] as const).map((d) => (
+                      <DropdownMenuRadioItem key={d} value={d}>
+                        <div className="flex flex-1 items-center justify-between gap-3 capitalize">
+                          <span>{d}</span>
+                          <DensityPreview density={d} active={density === d} />
+                        </div>
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={() => onNavigate("components")}>
                     Component gallery

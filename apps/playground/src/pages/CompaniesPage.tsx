@@ -27,6 +27,7 @@ import {
   X,
 } from "lucide-react";
 import { companies, type Company, type CompanyStatus } from "../data/companies";
+import { densityToTableSize, useDensity } from "../useDensity";
 
 const columns: ColumnDef<Company, any>[] = [
   { accessorKey: "businessLegalName", header: "Business Legal Name" },
@@ -100,6 +101,7 @@ export function CompaniesPage({ statusFilter }: CompaniesPageProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ status: false });
   const [filterCount] = React.useState(statusFilter ? 1 : 0);
+  const { density } = useDensity();
 
   const filtered = React.useMemo(() => {
     let rows = companies;
@@ -239,6 +241,7 @@ export function CompaniesPage({ statusFilter }: CompaniesPageProps) {
         onColumnVisibilityChange={setColumnVisibility}
         emptyMessage="No companies match your filters."
         className="min-h-0 flex-1"
+        size={densityToTableSize[density]}
       />
 
       <TablePagination

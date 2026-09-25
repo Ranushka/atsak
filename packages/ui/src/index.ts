@@ -40,7 +40,7 @@ export { Sidebar, type SidebarNode, type SidebarProps } from "./organisms/Sideba
 export { AppRail, type AppRailItem, type AppRailProps } from "./organisms/AppRail";
 export { Topbar, type TopbarProps } from "./organisms/Topbar";
 export { PageHeader, type PageHeaderProps } from "./organisms/PageHeader";
-export { DataTable, type DataTableProps } from "./organisms/DataTable";
+export { DataTable, type DataTableProps, type DataTableSize } from "./organisms/DataTable";
 export { TablePagination, type TablePaginationProps } from "./organisms/TablePagination";
 
 // templates

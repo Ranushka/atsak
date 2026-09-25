@@ -2,6 +2,7 @@ import * as React from "react";
 import { Shell } from "./Shell";
 import { CompaniesPage } from "./pages/CompaniesPage";
 import { ComponentsPage } from "./pages/ComponentsPage";
+import { DensityProvider } from "./useDensity";
 import type { CompanyStatus } from "./data/companies";
 
 function useHashRoute() {
@@ -41,8 +42,10 @@ export function App() {
   }
 
   return (
-    <Shell activeId={route} onNavigate={navigate}>
-      {content}
-    </Shell>
+    <DensityProvider>
+      <Shell activeId={route} onNavigate={navigate}>
+        {content}
+      </Shell>
+    </DensityProvider>
   );
 }
