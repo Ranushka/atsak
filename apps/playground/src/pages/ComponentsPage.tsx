@@ -1,44 +1,114 @@
 import * as React from "react";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
+  AppRail,
   Avatar,
   Badge,
   Button,
   Checkbox,
+  DataTable,
   DropdownMenuRoot,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   Input,
   Label,
+  NavItem,
   PageHeader,
   Pagination,
   SearchInput,
   SegmentedControl,
   Separator,
+  Sidebar,
+  type SidebarNode,
   Skeleton,
   Spinner,
   Switch,
+  TablePagination,
   Tooltip,
+  Topbar,
 } from "@qashio/ui";
 import { Amount, CardMask, CountryPill, StatusPill } from "@qashio/finance-ui";
-import { LayoutGrid, Palette } from "lucide-react";
+import {
+  Boxes,
+  Home,
+  LayoutGrid,
+  LineChart,
+  Package,
+  Palette,
+  Sparkles,
+  Users,
+} from "lucide-react";
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  align = "row",
+}: {
+  title: string;
+  children: React.ReactNode;
+  align?: "row" | "block";
+}) {
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{title}</h2>
-      <div className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface p-4">
+      <div
+        className={
+          align === "row"
+            ? "flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface p-4"
+            : "overflow-hidden rounded-lg border border-border bg-surface"
+        }
+      >
         {children}
       </div>
     </section>
   );
 }
 
+const demoSidebarItems: SidebarNode[] = [
+  { id: "home", label: "Home", icon: <Home className="size-4" /> },
+  {
+    id: "companies",
+    label: "Companies",
+    icon: <Users className="size-4" />,
+    children: [
+      { id: "active", label: "Active" },
+      { id: "pending", label: "Pending KYB" },
+    ],
+  },
+  { id: "reports", label: "Reports", icon: <LineChart className="size-4" /> },
+];
+
+interface DemoRow {
+  name: string;
+  role: string;
+  status: "active" | "pending_kyb";
+}
+
+const demoRows: DemoRow[] = [
+  { name: "Saeed Al Zaabi", role: "Owner", status: "active" },
+  { name: "Khalid Al Farsi", role: "Finance", status: "pending_kyb" },
+  { name: "Yusuf Al Suwaidi", role: "Admin", status: "active" },
+];
+
+const demoColumns: ColumnDef<DemoRow, any>[] = [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "role", header: "Role" },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ getValue }) => <StatusPill status={getValue<DemoRow["status"]>()} />,
+  },
+];
+
 export function ComponentsPage() {
   const [segment, setSegment] = React.useState("a");
   const [page, setPage] = React.useState(4);
   const [checked, setChecked] = React.useState<boolean | "indeterminate">(true);
   const [on, setOn] = React.useState(true);
+  const [sidebarActive, setSidebarActive] = React.useState("home");
+  const [tablePage, setTablePage] = React.useState(1);
+  const [tablePageSize, setTablePageSize] = React.useState(10);
 
   return (
     <div className="flex flex-col gap-8">
@@ -140,6 +210,75 @@ export function ComponentsPage() {
           <Section title="Pagination">
             <Pagination page={page} pageCount={12} onPageChange={setPage} />
           </Section>
+          <Section title="NavItem" align="block">
+            <div className="flex flex-col gap-0.5 p-2">
+              <NavItem icon={<Home className="size-4" />} active>
+                Home
+              </NavItem>
+              <NavItem icon={<Users className="size-4" />}>Companies</NavItem>
+              <NavItem indent={1}>Active</NavItem>
+            </div>
+          </Section>
+        </div>
+      </div>
+
+      <div>
+        <h1 className="mb-3 flex items-center gap-2 text-base font-semibold">
+          <Boxes className="size-4" /> Organisms
+        </h1>
+        <div className="flex flex-col gap-6">
+          <Section title="PageHeader" align="block">
+            <PageHeader
+              className="p-4"
+              icon={<Users className="size-5" />}
+              title="Companies"
+              description="Manage onboarded and prospective companies."
+              actions={<Button variant="brand">Create</Button>}
+            />
+          </Section>
+          <Section title="Topbar" align="block">
+            <Topbar
+              start={<SearchInput placeholder="Ask Qashio…" className="max-w-xs" />}
+              end={<Avatar name="Admin User" />}
+            />
+          </Section>
+          <Section title="AppRail">
+            <div className="h-72 overflow-hidden rounded-lg border border-border">
+              <AppRail
+                logo={
+                  <div className="flex size-9 items-center justify-center rounded-lg border-2 border-brand text-brand">
+                    <Package className="size-5" />
+                  </div>
+                }
+                items={[
+                  { id: "ai", label: "AI Assistant", icon: <Sparkles className="size-5" />, active: true },
+                  { id: "analytics", label: "Analytics", icon: <LineChart className="size-5" /> },
+                ]}
+              />
+            </div>
+          </Section>
+          <Section title="Sidebar">
+            <div className="h-72 overflow-hidden rounded-lg border border-border">
+              <Sidebar
+                items={demoSidebarItems}
+                activeId={sidebarActive}
+                onNavigate={(id) => setSidebarActive(id)}
+                header={<span className="text-sm font-semibold">Qashio 360</span>}
+              />
+            </div>
+          </Section>
+          <Section title="DataTable & TablePagination" align="block">
+            <div className="flex flex-col gap-3 p-4">
+              <DataTable columns={demoColumns} data={demoRows} getRowId={(row) => row.name} />
+              <TablePagination
+                total={demoRows.length}
+                page={tablePage}
+                pageSize={tablePageSize}
+                onPageChange={setTablePage}
+                onPageSizeChange={setTablePageSize}
+              />
+            </div>
+          </Section>
         </div>
       </div>
 
@@ -162,6 +301,17 @@ export function ComponentsPage() {
             <CountryPill code="SA" />
           </Section>
         </div>
+      </div>
+
+      <div>
+        <h1 className="mb-3 text-base font-semibold">Templates</h1>
+        <Section title="AdminLayout">
+          <p className="text-sm text-muted-foreground">
+            [rail][sidebar][topbar + scrollable main], full viewport height — this whole app shell
+            (the rail, sidebar, and topbar around this page) <em>is</em> an <code>AdminLayout</code>, so it's
+            demonstrated by every page rather than nested here.
+          </p>
+        </Section>
       </div>
     </div>
   );
