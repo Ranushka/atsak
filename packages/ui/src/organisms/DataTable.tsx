@@ -102,6 +102,7 @@ export function DataTable<TData>({
     const selectColumn: ColumnDef<TData, any> = {
       id: "__select",
       size: 36,
+      enableResizing: false,
       meta: { width: 36 },
       header: ({ table }) => (
         <Checkbox
@@ -140,6 +141,8 @@ export function DataTable<TData>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: manualSorting ? undefined : getSortedRowModel(),
     enableRowSelection: selectable,
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
   });
 
   const rows = table.getRowModel().rows;
@@ -149,24 +152,28 @@ export function DataTable<TData>({
       className={cn("relative w-full overflow-auto rounded-md border border-border", className)}
       style={maxHeight ? { maxHeight } : undefined}
     >
-      <table className="w-full caption-bottom text-sm">
+      <table className="caption-bottom text-sm" style={{ width: table.getTotalSize(), tableLayout: "fixed" }}>
         <thead className="sticky top-0 z-10 bg-surface">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id} className="border-b border-border">
               {headerGroup.headers.map((header) => {
                 const align = header.column.columnDef.meta?.align;
-                const width = header.column.columnDef.meta?.width;
                 const canSort = header.column.getCanSort();
+                const canResize = header.column.getCanResize();
                 const sortState = header.column.getIsSorted();
                 return (
                   <th
                     key={header.id}
-                    style={width ? { width } : undefined}
-                    className={cn(dataTableHeaderVariants({ size }), align === "end" ? "text-end" : "text-start")}
+                    style={{ width: header.getSize() }}
+                    className={cn(
+                      "relative",
+                      dataTableHeaderVariants({ size }),
+                      align === "end" ? "text-end" : "text-start"
+                    )}
                   >
                     {header.isPlaceholder ? null : (
                       <div className={cn("flex items-center gap-1", align === "end" && "justify-end")}>
-                        <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+                        <span className="truncate">{flexRender(header.column.columnDef.header, header.getContext())}</span>
                         {header.column.id !== "__select" && (
                           <DropdownMenuRoot>
                             <DropdownMenuTrigger asChild>
@@ -206,6 +213,17 @@ export function DataTable<TData>({
                           </DropdownMenuRoot>
                         )}
                       </div>
+                    )}
+                    {canResize && (
+                      <div
+                        onMouseDown={header.getResizeHandler()}
+                        onTouchStart={header.getResizeHandler()}
+                        onClick={(e) => e.stopPropagation()}
+                        className={cn(
+                          "absolute end-0 top-0 h-full w-1 cursor-col-resize touch-none select-none rounded-full bg-transparent hover:bg-brand/40",
+                          header.column.getIsResizing() && "bg-brand"
+                        )}
+                      />
                     )}
                   </th>
                 );
