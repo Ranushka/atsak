@@ -296,8 +296,11 @@ export function ComponentsPage() {
 <Finance.CardMask last4="4242" />
           </Section>
           <Section title="CountryPill" align="row">
-<Finance.CountryPill code="AE" />
-<Finance.CountryPill code="SA" />
+<div className="flex flex-wrap items-center gap-3">
+  {(["sm", "md", "lg"] as const).map((s) => (
+    <Finance.CountryPill key={s} code="AE" size={s} />
+  ))}
+</div>
           </Section>
           <Section title="CountrySwitcher" align="row">
 {(function Demo() {

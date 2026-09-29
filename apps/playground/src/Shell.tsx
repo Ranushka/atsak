@@ -167,7 +167,7 @@ export function Shell({ activeId, onNavigate, children }: ShellProps) {
             }
             end={
               <>
-                <CountrySwitcher value={country} onChange={setCountry} />
+                <CountrySwitcher value={country} onChange={setCountry} size="md" />
                 <DropdownMenuRoot>
                   <DropdownMenuTrigger asChild>
                     <button type="button" className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-accent">

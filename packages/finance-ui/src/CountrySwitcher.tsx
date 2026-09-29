@@ -1,4 +1,5 @@
 import * as React from "react";
+import { type VariantProps } from "class-variance-authority";
 import {
   cn,
   DropdownMenuRoot,
@@ -8,18 +9,21 @@ import {
   DropdownMenuRadioItem,
 } from "@qashio/ui";
 import { ChevronDown } from "lucide-react";
-import { countries } from "./CountryPill";
+import { countries, countryPillVariants, countryFlagSizeBySize } from "./CountryPill";
 
-export interface CountrySwitcherProps {
+export interface CountrySwitcherProps extends VariantProps<typeof countryPillVariants> {
   value: keyof typeof countries;
   onChange: (code: keyof typeof countries) => void;
   className?: string;
 }
 
+const chevronSizeBySize = { sm: "size-2.5", md: "size-3", lg: "size-3.5" };
+
 /** CountryPill's trigger-able sibling: same look, opens a flag-illustrated picker. */
-export function CountrySwitcher({ value, onChange, className }: CountrySwitcherProps) {
+export function CountrySwitcher({ value, onChange, size, className }: CountrySwitcherProps) {
   const current = countries[value];
   const CurrentFlag = current.Flag;
+  const resolvedSize = size ?? "md";
 
   return (
     <DropdownMenuRoot>
@@ -27,13 +31,14 @@ export function CountrySwitcher({ value, onChange, className }: CountrySwitcherP
         <button
           type="button"
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-accent",
+            countryPillVariants({ size }),
+            "transition-colors hover:bg-accent",
             className
           )}
         >
-          <CurrentFlag className="h-3 w-4 rounded-[2px]" />
+          <CurrentFlag className={cn(countryFlagSizeBySize[resolvedSize], "rounded-[2px]")} />
           {current.label}
-          <ChevronDown className="size-3 text-muted-foreground" />
+          <ChevronDown className={cn(chevronSizeBySize[resolvedSize], "text-muted-foreground")} />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
