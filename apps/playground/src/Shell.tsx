@@ -19,7 +19,7 @@ import {
   type SidebarNode,
   Topbar,
 } from "@qashio/ui";
-import { CountryPill } from "@qashio/finance-ui";
+import { CountrySwitcher } from "@qashio/finance-ui";
 import {
   Bot,
   ChevronsUpDown,
@@ -73,6 +73,7 @@ export interface ShellProps {
 export function Shell({ activeId, onNavigate, children }: ShellProps) {
   const { theme, setTheme, dir, setDir } = useThemeDir();
   const { density, setDensity } = useDensity();
+  const [country, setCountry] = React.useState<"AE" | "SA">("AE");
 
   return (
     <QdsProvider dir={dir}>
@@ -155,7 +156,8 @@ export function Shell({ activeId, onNavigate, children }: ShellProps) {
             start={
               <SearchInput
                 placeholder="Ask Qashio…"
-                className="max-w-md"
+                size="lg"
+                className="max-w-lg"
                 end={
                   <Button size="xs" variant="brand-outline">
                     <Bot className="size-3.5" /> AI Mode
@@ -165,7 +167,7 @@ export function Shell({ activeId, onNavigate, children }: ShellProps) {
             }
             end={
               <>
-                <CountryPill code="AE" />
+                <CountrySwitcher value={country} onChange={setCountry} />
                 <DropdownMenuRoot>
                   <DropdownMenuTrigger asChild>
                     <button type="button" className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-accent">

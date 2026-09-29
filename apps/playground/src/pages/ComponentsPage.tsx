@@ -82,7 +82,11 @@ export function ComponentsPage() {
 })()}
           </Section>
           <Section title="Input" align="row">
-<QDS.Input placeholder="you@qashio.com" />
+<div className="flex flex-col gap-2">
+  {(["sm", "md", "lg"] as const).map((s) => (
+    <QDS.Input key={s} size={s} placeholder={`size="${s}"`} className="w-64" />
+  ))}
+</div>
           </Section>
           <Section title="Label" align="row">
 <div className="flex flex-col gap-1.5">
@@ -294,6 +298,12 @@ export function ComponentsPage() {
           <Section title="CountryPill" align="row">
 <Finance.CountryPill code="AE" />
 <Finance.CountryPill code="SA" />
+          </Section>
+          <Section title="CountrySwitcher" align="row">
+{(function Demo() {
+  const [value, setValue] = React.useState<"AE" | "SA">("AE");
+  return <Finance.CountrySwitcher value={value} onChange={setValue} />;
+})()}
           </Section>
           <Section title="Flags" align="row">
 <Finance.FlagAE className="h-6 w-9 rounded" />

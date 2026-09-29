@@ -7,14 +7,33 @@ export interface SearchInputProps extends InputProps {
   end?: React.ReactNode;
 }
 
+const iconInsetBySize = { sm: "start-2.5", md: "start-3", lg: "start-3.5" };
+const iconSizeBySize = { sm: "size-3.5", md: "size-4", lg: "size-5" };
+const paddingStartBySize = { sm: "ps-8", md: "ps-9", lg: "ps-11" };
+const paddingEndBySize = { sm: "pe-8", md: "pe-9", lg: "pe-11" };
+
 export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
-  ({ className, end, ...props }, ref) => (
-    <div className={cn("relative flex items-center", className)}>
-      <Search className="pointer-events-none absolute start-3 size-4 text-muted-foreground" />
-      <Input ref={ref} className={cn("ps-9", end ? "pe-9" : undefined)} {...props} />
-      {end ? <div className="absolute end-2 flex items-center">{end}</div> : null}
-    </div>
-  )
+  ({ className, end, size, ...props }, ref) => {
+    const resolvedSize = size ?? "md";
+    return (
+      <div className={cn("relative flex items-center", className)}>
+        <Search
+          className={cn(
+            "pointer-events-none absolute text-muted-foreground",
+            iconInsetBySize[resolvedSize],
+            iconSizeBySize[resolvedSize]
+          )}
+        />
+        <Input
+          ref={ref}
+          size={resolvedSize}
+          className={cn(paddingStartBySize[resolvedSize], end ? paddingEndBySize[resolvedSize] : undefined)}
+          {...props}
+        />
+        {end ? <div className="absolute end-2 flex items-center">{end}</div> : null}
+      </div>
+    );
+  }
 );
 SearchInput.displayName = "SearchInput";
 

@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@qashio/ui";
 import { FlagAE, FlagSA } from "./Flags";
 
-const countries = {
+export const countries = {
   AE: { label: "UAE", Flag: FlagAE },
   SA: { label: "KSA", Flag: FlagSA },
 } satisfies Record<string, { label: string; Flag: typeof FlagAE }>;
