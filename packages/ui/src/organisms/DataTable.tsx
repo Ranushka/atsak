@@ -166,7 +166,7 @@ export function DataTable<TData>({
                     key={header.id}
                     style={{ width: header.getSize() }}
                     className={cn(
-                      "relative",
+                      "group relative",
                       dataTableHeaderVariants({ size }),
                       align === "end" ? "text-end" : "text-start"
                     )}
@@ -179,7 +179,12 @@ export function DataTable<TData>({
                             <DropdownMenuTrigger asChild>
                               <button
                                 type="button"
-                                className="flex size-5 items-center justify-center rounded hover:bg-accent"
+                                className={cn(
+                                  "flex size-5 items-center justify-center rounded hover:bg-accent",
+                                  sortState
+                                    ? "opacity-100"
+                                    : "opacity-0 focus-visible:opacity-100 group-hover:opacity-100 data-[state=open]:opacity-100"
+                                )}
                                 aria-label={`Column options for ${header.column.id}`}
                               >
                                 {sortState === "asc" ? (
